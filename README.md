@@ -16,7 +16,7 @@ Uses Node.js Account Explorer backend to fetch all data for an account. Then ant
 
 ### Full manual UI
 
-[BitPeople](https://evmconnector.dev/load/%28'a!'0xKKKKKK0010'~fQ%28'n!'allowance_B8zRRAapprove.9MbalanceOf_B8zRAborderVoteT*7-claimPX.7-commit_R7J-courtkcourts_Adispute.D7-genesis4QAgetPairGAhourGAjudge.97-lateSY.7D-nymkoptIn.7-period4QApermits_Apopulation_ApX_R7D-pseudonymEventGAquarter_AreassignCourt.D7-reassignNym.D7Zer.J7Zry_B256z79ZryLength_ArevealHash.J7-schedule4QAseed_AsY.7D-sYd_AsYr_R7D-toSecondsGAtransfer.9MtransferFrom.9RMverify.7%5D%29%5D%29*QWuint256z-%5D%29%2C%28'n!'.TQ4'~t!'view'~i7%5D~oQ9WaddresszA%5D~o*-B%2CWuintDWboolzG'~t!'pure'~i*JWbytes32zK000000MB256zB8z7-Q!%5BR%2C9T'~t!'nonpayable'~iW%28't!'XroofOfUniqueHumanYhuffleZ-regist_4*kVerified.7-z'%29%01zk_ZYXWTRQMKJGDBA974.-*_)
+[Bitpeople](https://evmconnector.dev/load/%28'a!'0xKKKKKK0010'~fQ%28'n!'allowance_B8zRRAapprove.9MbalanceOf_B8zRAborderVoteT*7-claimPX.7-commit_R7J-courtkcourts_Adispute.D7-genesis4QAgetPairGAhourGAjudge.97-lateSY.7D-nymkoptIn.7-period4QApermits_Apopulation_ApX_R7D-pseudonymEventGAquarter_AreassignCourt.D7-reassignNym.D7Zer.J7Zry_B256z79ZryLength_ArevealHash.J7-schedule4QAseed_AsY.7D-sYd_AsYr_R7D-toSecondsGAtransfer.9MtransferFrom.9RMverify.7%5D%29%5D%29*QWuint256z-%5D%29%2C%28'n!'.TQ4'~t!'view'~i7%5D~oQ9WaddresszA%5D~o*-B%2CWuintDWboolzG'~t!'pure'~i*JWbytes32zK000000MB256zB8z7-Q!%5BR%2C9T'~t!'nonpayable'~iW%28't!'XroofOfUniqueHumanYhuffleZ-regist_4*kVerified.7-z'%29%01zk_ZYXWTRQMKJGDBA974.-*_)
 
 [Election](https://evmconnector.dev/load/KaP0x888888Q11IfAKnPallocateSuffrageToken94-allowedNEECapprove3B-balanceOfNECGNB7-GLengthNCgenesis.ChalftimeN4KDbool'%29-period.Cschedule.CtoSecondsIDpureM*CH3B-HFrom3EB-vote34JJ*KDuint256'%29-J%2CKnP.IDviewM3974%5D~oA7KDaddress'%298QQQ9IDnonpayableMA!%5BB%2C*4C4*-DtPE%2C7GelectionHtransferI'~J%5D%29K%28'MIiAN.*P!'Q00%01QPNMKJIHGEDCBA98743.-*_)
 
@@ -44,7 +44,7 @@ https://polytopia.org/scan
 
 ### Messaging and/or email
 
-Wallet-to-wallet messaging services like https://chat.blockscan.com/ or https://snaps.metamask.io/snap/npm/walletchat-metamask-snap/ look like really good ways to communicate with the person you are paired with in a BitPeople monthly event, so you can agree on what video communication channel you will use. Alternatively, https://ethmail.cc/ should also work.
+Wallet-to-wallet messaging services like https://chat.blockscan.com/ or https://snaps.metamask.io/snap/npm/walletchat-metamask-snap/ look like really good ways to communicate with the person you are paired with in a Bitpeople monthly event, so you can agree on what video communication channel you will use. Alternatively, https://ethmail.cc/ should also work.
 
 ### Install
 
