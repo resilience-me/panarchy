@@ -4,7 +4,7 @@ contract Bitpeople {
 }
 
 contract Schedule {
-    uint constant public genesis = 1712988000;
+    uint constant public genesis = 1715407200;
     uint constant public period = 4 weeks;
     function schedule() public view returns(uint) { return ((block.timestamp - genesis) / period); }
     function toSeconds(uint t) public pure returns (uint) { return genesis + t * period; }
