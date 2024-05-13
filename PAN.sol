@@ -55,9 +55,10 @@ contract PAN is Schedule, Exp {
         taxation(msg.sender);
         uint seconds_into_period = block.timestamp - toSeconds(t);
         uint tax_during_period = pow(taxRate, seconds_into_period);
-        balanceOf[msg.sender] += ubi*tax_during_period >> EXP;
+        uint ubiTaxed = ubi*tax_during_period >> EXP;
+        balanceOf[msg.sender] += ubiTaxed;
         claimedUBI[t][msg.sender] = true;
-        emit Transfer(address(this), msg.sender, ubi);
+        emit Transfer(address(this), msg.sender, ubiTaxed);
     }
 
     function taxation(address account) public {
