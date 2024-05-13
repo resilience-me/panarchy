@@ -127,7 +127,7 @@ function handlePseudonymEvent(address, data, isMetamask, bitpeople) {
 	    verifyBtn.addEventListener('click', () => bitpeople.verify());
 	    responseDisplay.appendChild(verifyBtn);
 	} else {
-	    responseDisplay.innerHTML += '<p>Log in with Metamask to verify the other person in the pair</p>';
+	    responseDisplay.innerHTML += '<p>Log in with a wallet to verify the other person in the pair</p>';
 	}
     } else if (helper.isVerified(data)) {
 	if(data.schedule.currentSchedule.quarter < 2) {
@@ -154,7 +154,7 @@ function handlePseudonymEvent(address, data, isMetamask, bitpeople) {
 	    } else {
 		responseDisplay.innerHTML += [
 		'<p>The account is verified and has collected its tokens</p>',
-		'<p>To judge any "courts" it was assigned to judge, log in with Metamask</p>'
+		'<p>To judge any "courts" it was assigned to judge, log in with a wallet</p>'
 		].join('');
 	    }
 	} else if (data.schedule.currentSchedule.quarter == 2 && isCommitSet(data)) {
@@ -181,7 +181,7 @@ function handlePseudonymEvent(address, data, isMetamask, bitpeople) {
 		responseDisplay.appendChild(input);
 		responseDisplay.appendChild(button);
 	} else {
-	    responseDisplay.innerHTML += `<p>Log in with Metamask to reveal the account's random number and claim its proof-of-unique-human</p>`;
+	    responseDisplay.innerHTML += `<p>Log in with a wallet to reveal the account's random number and claim its proof-of-unique-human</p>`;
 	}
     }
     } else if (helper.pairVerified(data)) {
@@ -192,7 +192,7 @@ function handlePseudonymEvent(address, data, isMetamask, bitpeople) {
 	    collectTokensBtn.addEventListener('click', () => bitpeople.nymVerified());
 	    responseDisplay.appendChild(collectTokensBtn);
 	} else {
-	    responseDisplay.innerHTML += '<p>The pair the account is in is verified. Log in with Metamask to collect the tokens</p>';
+	    responseDisplay.innerHTML += '<p>The pair the account is in is verified. Log in with a wallet to collect the tokens</p>';
 	}
     }
 }
@@ -227,7 +227,7 @@ function handleRegistrationStatus(address, data, isMetamask, bitpeople) {
 		    responseDisplay.innerHTML += `<p>You have been assigned to judge ${courtDynamicText}. They can contact you on ${baseUrl} too.</p>`;
 		}
 	    } else {
-                responseDisplay.innerHTML += '<p>Log in with Metamask to contact the person in the pair</p>';
+                responseDisplay.innerHTML += '<p>Log in with a wallet to contact the person in the pair</p>';
             }
         } else if (isMetamask) {
 	    responseDisplay.innerHTML += '<p>You are not paired yet. Wait until shuffling is complete. You can shuffle again to speed things up. </p>';
@@ -252,7 +252,7 @@ function handleOptInStatus(address, data, isMetamask) {
 		}
 	    });
 	} else {
-            responseDisplay.innerHTML += '<p>Log in with Metamask to contact the "court" the account is assigned to</p>';
+            responseDisplay.innerHTML += '<p>Log in with a wallet to contact the "court" the account is assigned to</p>';
         }
     }
 }
@@ -286,7 +286,7 @@ function handleOtherScenarios(address, data, isMetamask, bitpeople) {
             } else {
 		responseDisplay.innerHTML += [
 		    '<p>Registration closes ' + scheduleUtil.halftimeString(data) + '</p>',
-		    '<p>Log in with Metamask to register</p>'
+		    '<p>Log in with a wallet to register</p>'
 		].join('');
             }
         } else {
@@ -308,7 +308,7 @@ function handleOtherScenarios(address, data, isMetamask, bitpeople) {
             } else {
 		responseDisplay.innerHTML += [
 		    '<p>The opt-in period closes ' + scheduleUtil.halftimeString(data) + '</p>',
-                    '<p>Log in with Metamask to opt-in</p>'
+                    '<p>Log in with a wallet to opt-in</p>'
 		].join('');
             }
         } else {
@@ -339,7 +339,7 @@ function updateAddress(newAddress) {
 async function handleAccountChange(accounts) {
     if (accounts.length > 0) {
         metamaskAccount.style.display = 'block';
-        metamaskAccount.innerHTML = `Logged in with MetaMask. Account: <span class="truncated-address">${accounts[0]}</span>`;
+        metamaskAccount.innerHTML = `Logged in with a wallet. Account: <span class="truncated-address">${accounts[0]}</span>`;
         accountInput.style.display = 'none';
         const web3 = new Web3(window.ethereum);
         const txObj = await fromAndGasPrice(accounts[0], web3);
@@ -380,7 +380,7 @@ function setupEventListeners() {
                 console.error('User denied account access:', error);
             }
         } else {
-            console.log('MetaMask is not installed!');
+            console.log('Wallet is not available!');
         }
     });
 
@@ -413,7 +413,7 @@ window.addEventListener('load', async () => {
                 console.error('Error fetching accounts:', error);
             }
         } else {
-            console.log('MetaMask is not available.');
+            console.log('Wallet is not available.');
         }
     }
     adjustLogo();    
