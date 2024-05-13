@@ -1,0 +1,86 @@
+body {
+    background-color: #f4f6f8;
+    color: #333;
+    font-family: Arial, sans-serif;
+    padding: 20px;
+}
+
+/* Input and Button Base Styles */
+.address-input, .login-button, .load-button {
+    border-radius: 4px;
+    padding: 10px;
+    margin: 8px 0;
+}
+
+.address-input {
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    display: inline-block;
+}
+
+.login-button, .load-button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 16px;
+    text-align: center;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.login-button:hover, .load-button:hover {
+    background-color: #45a049;
+}
+
+.login-button:disabled, .load-button:disabled {
+    background-color: #ccc; /* Consistent disabled style */
+}
+
+/* Container Styles */
+#accountInput, .account-input {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    padding: 20px;
+    width: 300px;
+}
+
+#response, #metamaskAccount {
+    background-color: #f0f0f0;
+    font-family: 'Courier New', Courier, monospace;
+    margin-top: 10px;
+    padding: 10px;
+    white-space: pre-wrap;
+    display: none;
+}
+
+/* JSON Formatting Styles */
+.json-key { color: #a52a2a; }
+.json-value { color: #008000; }
+.json-string { color: #00f; }
+
+.manual-entry {
+    margin-top: 20px;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    background-color: #f0f0f0;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+}
+
+footer a {
+    margin: 0 10px;
+    color: #333;
+    text-decoration: none;
+}
+footer a:hover {
+    text-decoration: underline;
+}

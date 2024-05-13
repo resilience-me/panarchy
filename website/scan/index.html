@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Explorer</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+    <div id="accountInput" class="account-input">
+        <button id="loginButton" class="login-button">Log In with MetaMask</button>
+        <div class="manual-entry">
+            Or enter your address manually:
+            <input type="text" id="addressInput" placeholder="Enter your address" class="address-input">
+            <button id="loadAddressButton" class="load-button" disabled>Load</button>
+        </div>
+    </div>
+
+    <div id="metamaskAccount"></div>
+    <div id="response"></div>
+
+    <footer>
+        <a href="https://github.com/resilience-me/panarchy" target="_blank">GitHub</a>
+        <a href="mailto:bipedaljoe@protonmail.com">Email</a>
+    </footer>
+    
+    <script src="main.js"></script>
+</body>
+</html>
