@@ -36,8 +36,6 @@ http://139.144.72.164:8546
 
 https://scan.polytopia.org
 
-With Metamask or similar accessing Panarchy RPC server you can also use https://alanverbner.github.io/lightweight-eth-explorer/ or similar.
-
 ### Account Explorer
 
 https://polytopia.org/scan
