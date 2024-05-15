@@ -28,8 +28,7 @@ contract Election is Schedule {
     event Transfer(uint indexed schedule, address indexed from, address indexed to, uint256 value);
     event Approval(uint indexed schedule, address indexed owner, address indexed spender, uint256 value);
 
-
-    function vote(address validator) public {
+    function vote(address validator) external {
         uint t = schedule();
         require(!halftime(t), "Voting is only allowed before the halfway point.");
         require(data[t].balanceOf[msg.sender] >= 1, "Balance decrement failed: Insufficient balance");
@@ -38,7 +37,7 @@ contract Election is Schedule {
         emit Elected(t+1, validator);
     }
 
-    function allocateSuffrageToken() public {
+    function allocateSuffrageToken() external {
         uint t = schedule();
         require(bitpeople.proofOfUniqueHuman(t, msg.sender), "Failed to verify proof-of-unique-human.");
         require(!data[t].claimedSuffrageToken[msg.sender], "Suffrage token already claimed.");
