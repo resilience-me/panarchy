@@ -126,7 +126,7 @@ function handleClaimPoUH(address, data, isMetamask, bitpeople) {
     if (isMetamask) {
 	responseDisplay.innerHTML += '<p>Claim your proof-of-unique-human</p>';
 	const claimBtn = document.createElement('button');
-	claimPoUHBtn.textContent = 'Claim Proof-of-Unique-Human';
+	claimPoUHBtn.textContent = 'Claim PoUH';
 	claimPoUHBtn.addEventListener('click', () => bitpeople.claimProofOfUniqueHuman());
 	responseDisplay.appendChild(claimPoUHBtn);
     } else {
