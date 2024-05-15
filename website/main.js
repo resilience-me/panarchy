@@ -95,8 +95,10 @@ async function fetchAccountInfo(address, bitpeople) {
         responseDisplay.style.display = 'block';
 	    
         if (data.contracts.bitpeople.currentData.account.proofOfUniqueHuman) {
-            responseDisplay.innerHTML = userStringForLoggedInOrNot(isMetamask, address, ' have', ' has') + ' a proof-of-unique-human';
-        } else if (helper.inPseudonymEvent(data)) {
+            handlePoUH(address, data, isMetamask, bitpeople);
+        } else if (data.contracts.bitpeople.currentData.account.tokens.proofOfUniqueHuman > 0) {
+            handleClaimPoUH(address, data, isMetamask, bitpeople);
+	} else if (helper.inPseudonymEvent(data)) {
             handlePseudonymEvent(address, data, isMetamask, bitpeople);
         } else if (helper.isRegistered(data)) {
             handleRegistrationStatus(address, data, isMetamask, bitpeople);
@@ -116,6 +118,21 @@ function validateCourtAddressInput() {
     judgeButton.disabled = !formats.isValidAddress(input.value.trim());
 }
 
+function handlePoUH(address, data, isMetamask, bitpeople) {
+    responseDisplay.innerHTML = userStringForLoggedInOrNot(isMetamask, address, ' have', ' has') + ' a proof-of-unique-human';
+}
+function handleClaimPoUH(address, data, isMetamask, bitpeople) {
+    responseDisplay.innerHTML = userStringForLoggedInOrNot(isMetamask, address) + ' is verified and can claim their proof-of-unique-human';
+    if (isMetamask) {
+	responseDisplay.innerHTML += '<p>Claim your proof-of-unique-human</p>';
+	const claimBtn = document.createElement('button');
+	claimPoUHBtn.textContent = 'Claim PoUH';
+	claimPoUHBtn.addEventListener('click', () => bitpeople.claimProofOfUniqueHuman());
+	responseDisplay.appendChild(claimPoUHBtn);
+    } else {
+	responseDisplay.innerHTML += '<p>Log in with a wallet to claim the proof-of-unique-human</p>';
+    }
+}
 function handlePseudonymEvent(address, data, isMetamask, bitpeople) {
     responseDisplay.innerHTML = userStringForLoggedInOrNot(isMetamask, address, ' have', ' has') + ' participated in the pseudonym event';
 
