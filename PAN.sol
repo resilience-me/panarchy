@@ -15,7 +15,7 @@ contract Exp {
     uint256 internal constant EXP = 60;
     uint256 internal constant SCALE = 2**EXP;
 
-    function pow(uint256 x, uint256 y) public pure returns (uint256 result) {
+    function pow(uint256 x, uint256 y) internal pure returns (uint256 result) {
         result = y & 1 == 1 ? x : SCALE;
         for (y >>= 1; y > 0; y >>= 1) {
             x = (x * x + (SCALE >> 1)) >> EXP;
@@ -33,8 +33,8 @@ contract PAN is Schedule, Exp {
     string constant public symbol = "PAN";
     uint8 constant public decimals = 18;
 
-    uint constant taxRate = 0x0ffffffe185dd90b;
-    uint constant ubi = 17020135985237315;
+    uint constant public taxRate = 0x0ffffffe185dd90b;
+    uint constant public ubi = 17020135985237315;
 
     mapping (address => uint) public balanceOf;
     mapping (address => mapping (address => uint)) public allowance;
@@ -46,7 +46,7 @@ contract PAN is Schedule, Exp {
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Approval(address indexed owner, address indexed spender, uint256 value);
 
-    function totalSupply() public view returns (uint) { return 10**decimals*bitpeople.population(schedule()); }
+    function totalSupply() external view returns (uint) { return 10**decimals*bitpeople.population(schedule()); }
 
     function withdrawUBI() external {
         uint t = schedule();
