@@ -12,10 +12,10 @@ contract Schedule {
 
 contract Exp {
 
-    uint256 internal constant EXP = 60;
-    uint256 internal constant SCALE = 2**EXP;
+    uint256 public constant EXP = 60;
+    uint256 public constant SCALE = 2**EXP;
 
-    function pow(uint256 x, uint256 y) internal pure returns (uint256 result) {
+    function pow(uint256 x, uint256 y) public pure returns (uint256 result) {
         result = y & 1 == 1 ? x : SCALE;
         for (y >>= 1; y > 0; y >>= 1) {
             x = (x * x + (SCALE >> 1)) >> EXP;
