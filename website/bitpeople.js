@@ -143,4 +143,14 @@ class Bitpeople {
             console.error('Error transferring token:', error);
         }
     }
+    async claimProofOfUniqueHuman() {
+        try {
+            const result = await this.bitpeopleContract.methods.claimProofOfUniqueHuman().send(this.txObj);
+	    console.log('Transaction successful:', result);
+            responseDisplay.innerText = 'You now have a proof-of-unique-human';
+        } catch (error) {
+            responseDisplay.innerText = 'Error claiming proof-of-unique-human';
+            console.error('Error claiming proof-of-unique-human:', error);
+        }
+    }
 }
