@@ -2,48 +2,7 @@ body {
     background-color: #f4f6f8;
     color: #333;
     font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-}
-#content {
-    padding: 20px 20px 20px 20px;
-}
-
-.navbar {
-    overflow: hidden;
-    padding: 5px 16px;
-}
-.navbar .menu-icon {
-    font-size: 30px;
-    color: white;
-    cursor: pointer;
-    position: relative;
-    z-index: 2; /* Make sure it stays in front */
-}
-.header {
-    padding: 5px;
-    display: none;
-    width: 100%;
-    color: white;
-    background-color: #333;
-    text-align: center;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1;
-}
-.header a {
-    font-weight: bold;
-    color: white;
-    padding: 14px 16px;
-    text-decoration: none;
-    display: inline-block;
-}
-.header a:hover {
-    text-decoration: underline;
-}
-.header.show {
-    display: block;
+    padding: 20px;
 }
 
 /* Input and Button Base Styles */
