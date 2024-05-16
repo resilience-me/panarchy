@@ -7,16 +7,6 @@
     <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 <body>
-    <div class="navbar">
-        <span class="menu-icon" onclick="toggleHeader()">&#9776;</span>
-    </div>
-
-    <div class="header" id="headerMenu">
-        <a href="#event">Event</a>
-        <a href="#pouh">PoUH</a>
-        <a href="#tokens">Tokens</a>
-    </div>
-
 <div id="content">
     <div id="accountInput" class="account-input">
         <button id="loginButton" class="login-button">Log In with a wallet</button>
@@ -40,25 +30,5 @@
     <script src="bitpeople.js"></script>
     <script src="logo.js"></script>
     <script src="main.js"></script>
-    <script>
-        function toggleHeader() {
-            var header = document.getElementById("headerMenu");
-            if (header.classList.contains('show')) {
-                header.classList.remove('show');
-            } else {
-                header.classList.add('show');
-            }
-        }
-
-        // Close the header menu if the user clicks outside of it
-        window.onclick = function(event) {
-            if (!event.target.matches('.menu-icon') && !event.target.closest('.header')) {
-                var header = document.getElementById("headerMenu");
-                if (header.classList.contains('show')) {
-                    header.classList.remove('show');
-                }
-            }
-        }
-    </script>
 </body>
 </html>
