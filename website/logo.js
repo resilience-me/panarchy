@@ -5,16 +5,14 @@ function adjustLogo() {
     } else {
         windowHeight = window.innerHeight;
     }
-    var contentDiv = document.getElementById('content');
-    var contentHeight = contentDiv.offsetHeight;
+    var contentHeight = document.getElementById('content').offsetHeight;
     var footerHeight = document.querySelector('footer').offsetHeight;
-    var navbarHeight = document.querySelector('.navbar').offsetHeight;
-
-    var contentStyles = window.getComputedStyle(contentDiv);
+    var bodyStyles = window.getComputedStyle(document.body);
+    var bodyPaddingVertical = parseInt(bodyStyles.paddingTop) + parseInt(bodyStyles.paddingBottom);
     var logoPadding = 60;
-    var logoContainerHeight = windowHeight-navbarHeight-contentHeight-footerHeight-logoPadding;
-    var contentPaddingHorizontal = parseInt(contentStyles.paddingLeft) + parseInt(contentStyles.paddingRight);
-    var logoContainerWidth = window.innerWidth-contentPaddingHorizontal-logoPadding;
+    var logoContainerHeight = windowHeight-bodyPaddingVertical-contentHeight-footerHeight-logoPadding;
+    var bodyPaddingHorizontal = parseInt(bodyStyles.paddingLeft) + parseInt(bodyStyles.paddingRight);
+    var logoContainerWidth = window.innerWidth-bodyPaddingHorizontal-logoPadding;
     var logoSize;
     if(logoContainerWidth > logoContainerHeight) logoSize = logoContainerHeight;
     else logoSize = logoContainerWidth;
