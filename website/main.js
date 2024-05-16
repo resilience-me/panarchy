@@ -2,6 +2,7 @@ const apiURL = '/node/account/';
 const metamaskAccount = document.getElementById('metamaskAccount');
 const accountInput = document.getElementById('accountInput');
 const dropdownMenu = document.querySelector('.dropdownMenu');
+const options = document.getElementById('options');
 const responseDisplay = document.getElementById('response');
 const addressInput = document.getElementById('addressInput');
 const loadAddressButton = document.getElementById('loadAddressButton');
@@ -108,16 +109,17 @@ async function fetchAccountInfo(address, bitpeople) {
 	} else {
             handleOtherScenarios(address, data, isMetamask, bitpeople);
         }
+	if(options.options.length >= 1) {
+	    dropdownMenu.style.display = 'block';
+	}
     } catch (error) {
         console.error('Error fetching account info:', error);
     }
 }
 function appendOption(optionText) {
-    const select = document.getElementById('options');
     const option = document.createElement('option');
     option.textContent = optionText;
-    select.appendChild(option);
-    dropdownMenu.style.display = 'block';
+    options.appendChild(option);
 }
 function validateCourtAddressInput() {
     const input = document.getElementById('courtAddressInput');
