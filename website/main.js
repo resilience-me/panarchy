@@ -1,6 +1,7 @@
 const apiURL = '/node/account/';
 const metamaskAccount = document.getElementById('metamaskAccount');
 const accountInput = document.getElementById('accountInput');
+const dropdownMenu = document.querySelector('dropdownMenu');
 const responseDisplay = document.getElementById('response');
 const addressInput = document.getElementById('addressInput');
 const loadAddressButton = document.getElementById('loadAddressButton');
@@ -115,7 +116,8 @@ function appendOption(optionText) {
     const select = document.getElementById('options');
     const option = document.createElement('option');
     option.textContent = optionText;
-    select.appendChild(option);	    
+    select.appendChild(option);
+    dropdownMenu.style.display = 'block';
 }
 function validateCourtAddressInput() {
     const input = document.getElementById('courtAddressInput');
