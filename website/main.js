@@ -164,7 +164,7 @@ function handlePseudonymEvent(address, data, isMetamask, bitpeople) {
 		judgeButton.id = 'judgeButton';
 		judgeButton.textContent = 'Judge';
 		judgeButton.disabled = true;
-		judgeButton.addEventListener('click', () => judge(document.getElementById('courtAddressInput').value));
+		judgeButton.addEventListener('click', () => bitpeople.judge(document.getElementById('courtAddressInput').value));
 		responseDisplay.appendChild(judgeButton);
 		
 		inputField.oninput = validateCourtAddressInput;
