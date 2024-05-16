@@ -109,7 +109,7 @@ async function fetchAccountInfo(address, bitpeople) {
 	} else {
             handleOtherScenarios(address, data, isMetamask, bitpeople);
         }
-	if(options.options.length >= 1) {
+	if(options.options.length > 1) {
 	    dropdownMenu.style.display = 'block';
 	}
     } catch (error) {
