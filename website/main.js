@@ -356,7 +356,7 @@ function handleOtherScenarios(address, data, isMetamask, bitpeople) {
             responseDisplay.innerText = 'The next opt-in period opens on: ' + scheduleUtil.nextPeriodString(data);
         }
     } else {
-	//appendOption("Default");
+	appendOption("Default");
         responseDisplay.innerHTML += userStringForLoggedInOrNot(isMetamask, address, ' need', ' needs') + ' a register token or an opt-in token to participate in the event';
     }
 }
