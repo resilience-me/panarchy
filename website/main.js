@@ -250,6 +250,21 @@ function handleRegistrationStatus(address, data, isMetamask, bitpeople) {
 	    responseDisplay.innerHTML += '<p>You are not paired yet. Wait until shuffling is complete. You can shuffle again to speed things up. </p>';
             setupShuffleButton();
         }
+    } else if (data.schedule.currentSchedule.quarter < 2 && data.contracts.bitpeople.currentData.account.tokens.optIn > 0 && isMetamask) {
+	responseDisplay.innerHTML += '<p>You have an extra opt-in token. You can use it to invite another person: </p>';
+	const input = document.createElement("input");
+	input.type = "text";
+	input.value = "Account to invite";
+	input.size = 42;
+	const button = document.createElement("button");
+	button.textContent = "Transfer";
+	button.disabled = true;
+	input.addEventListener('input', function() {
+	    button.disabled = !formats.isValidAddress(input.value.trim());
+	});	    
+	button.addEventListener('click', () => bitpeople.transfer(input.value(), 1, 2));
+	responseDisplay.appendChild(input);
+	responseDisplay.appendChild(button);
     }
 }
 
