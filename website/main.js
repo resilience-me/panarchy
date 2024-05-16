@@ -360,7 +360,7 @@ function handleOtherScenarios(address, data, isMetamask, bitpeople) {
         }
     } else {
 	appendOption("Default");
-        responseDisplay.innerHTML = userStringForLoggedInOrNot(isMetamask, address, ' need', ' needs') + ' a register token or an opt-in token to participate in the event';
+        responseDisplay.innerHTML += userStringForLoggedInOrNot(isMetamask, address, ' need', ' needs') + ' a register token or an opt-in token to participate in the event';
     }
 }
 
