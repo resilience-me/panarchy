@@ -118,7 +118,12 @@ async function fetchAccountInfo(address, bitpeople) {
         console.error('Error fetching account info:', error);
     }
 }
-
+function appendOption(optionText) {
+    const select = document.getElementById('options');
+    const option = document.createElement('option');
+    option.textContent = optionText;
+    select.appendChild(option);	    
+}
 function validateCourtAddressInput() {
     const input = document.getElementById('courtAddressInput');
     const judgeButton = document.getElementById('judgeButton');
@@ -354,6 +359,7 @@ function handleOtherScenarios(address, data, isMetamask, bitpeople) {
             responseDisplay.innerText = 'The next opt-in period opens on: ' + scheduleUtil.nextPeriodString(data);
         }
     } else {
+	appendOption("Default");
         responseDisplay.innerHTML = userStringForLoggedInOrNot(isMetamask, address, ' need', ' needs') + ' a register token or an opt-in token to participate in the event';
     }
 }
