@@ -135,8 +135,9 @@ class Bitpeople {
     async transfer(to, value, token) {
         try {
             const result = await this.bitpeopleContract.methods.transfer(to, value, token).send(this.txObj);
-            console.log('Transfer successful:', result);
-            responseDisplay.innerHTML = 'Transferred ${value} token to <span class="truncated-address">${to},</span>';
+	    console.log('Transfer successful:', result);
+	    const tokenText = value === 1 ? 'token' : 'tokens';
+	    responseDisplay.innerHTML = `Transferred ${value} ${tokenText} to <span class="truncated-address">${to}</span>`;
         } catch (error) {
             responseDisplay.innerText = 'Error transferring token';
             console.error('Error transferring token:', error);
