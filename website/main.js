@@ -94,13 +94,6 @@ async function fetchAccountInfo(address, bitpeople) {
 
         responseDisplay.style.display = 'block';
 
-        const form = document.createElement('form');
-        form.className = 'dropdownMenu';
-        const select = document.createElement('select');
-        select.id = 'options';
-	form.appendChild(select);
-        responseDisplay.appendChild(form);
-
         if (data.contracts.bitpeople.currentData.account.proofOfUniqueHuman) {
             handlePoUH(address, data, isMetamask, bitpeople);
         } else if (data.contracts.bitpeople.currentData.account.tokens.proofOfUniqueHuman > 0) {
