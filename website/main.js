@@ -398,6 +398,7 @@ function resetDisplay() {
     accountInput.style.display = 'block';
     responseDisplay.innerText = '';
     responseDisplay.style.display = 'none'
+    selectElement.innerHTML = '';
 }
 
 function setupEventListeners() {
