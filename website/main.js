@@ -408,6 +408,7 @@ function setupEventListeners() {
     loadAddressButton.addEventListener('click', async () => {
         const address = addressInput.value.trim();
         if (formats.isValidAddress(address)) {
+            resetDisplay();
             await fetchAccountInfo(address);
             updateAddress(address);
         } else {
