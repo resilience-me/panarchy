@@ -28,6 +28,8 @@ contract Election is Schedule {
 
     Bitpeople bitpeople = Bitpeople(0x0000000000000000000000000000000000000010);
 
+    uint constant public slotTime = 12;
+
     struct Data {
         address[] election;
         mapping (address => uint) balanceOf;
