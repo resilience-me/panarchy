@@ -10,6 +10,20 @@ contract Schedule {
     function halftime(uint t) public view returns (bool) { return((block.timestamp > toSeconds(t)+period/2)); }
 }
 
+contract Reward {
+    address public rewardAddress;
+
+    constructor(address _rewardAddress) {
+        rewardAddress = _rewardAddress;
+    }
+
+    function withdraw() external {
+        require(msg.sender == rewardAddress, "Not authorized");
+        uint256 balance = address(this).balance;
+        rewardAddress.call{value: balance}("");
+    }
+}
+
 contract Election is Schedule {
 
     Bitpeople bitpeople = Bitpeople(0x0000000000000000000000000000000000000010);
