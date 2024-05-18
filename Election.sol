@@ -1,4 +1,7 @@
-contract Bitpeople { function proofOfUniqueHuman(uint t, address account) external view returns (bool) {} }
+contract Bitpeople { 
+    function seed(uint t) external view returns (uint) {}
+    function proofOfUniqueHuman(uint t, address account) external view returns (bool) {}
+}
 
 contract Schedule {
 
