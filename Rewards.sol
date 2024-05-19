@@ -11,7 +11,7 @@ contract Election {
     function electionLength(uint t) external view returns (uint) {}
 }
 
-contract Reward {
+contract Coinbase {
     address constant internal electionContract = 0x0000000000000000000000000000000000000011;
     function withdraw(address rewardAddress) external { require(msg.sender == electionContract); selfdestruct(payable(rewardAddress)); }
 }
@@ -43,9 +43,9 @@ contract Rewards is Schedule {
     function createRewardContract() external returns (bool) {
         uint256 currentSlot = (block.timestamp - genesis) / slotTime;
         if(currentSlot <= nonce) return false;
-        Reward reward = new Reward();
-        if(address(reward).balance == 0) {
-            reward.withdraw(address(0));
+        Coinbase coinbase = new Coinbase();
+        if(address(coinbase).balance == 0) {
+            coinbase.withdraw(address(0));
             return true;
         }
         uint t = (nonce * slotTime) / period;
@@ -55,7 +55,7 @@ contract Rewards is Schedule {
         uint rewardContractIndex = rewardContract[validator].length-1;
         while(rewardContract[validator][rewardContractIndex].validSince > t) { rewardContractIndex--; }
         if(rewardContract[validator][rewardContractIndex].addr == address(0)) {
-            reward.withdraw(validator);
+            coinbase.withdraw(validator);
             return true;
         }
         rewardContract[validator][rewardContractIndex].slotsRewarded.push(nonce);
