@@ -1,3 +1,9 @@
+// Will likely be adding ability to automate validator rewards to voters, current work on that in code below. Was previously 
+// skipping it and leaving it to be done manually, mostly because the Geth consensus engine interface seemed to not support it well 
+// (was no way to read state during prepare for example) but found a few good workarounds, one relies on temporary rewarad storage contracts
+// that can be deterministically known (thus hardcoded into Geth) and it seems like a good solution so I'll code that at least, and possibly
+// restart the network to use it
+
 contract Bitpeople { 
     function seed(uint t) external view returns (uint) {}
     function proofOfUniqueHuman(uint t, address account) external view returns (bool) {}
@@ -19,6 +25,39 @@ contract Reward {
 }
 
 contract Election is Schedule {
+
+    uint public nonce;
+
+    struct RewardContract {
+        address addr;
+        uint[] slotsRewarded;
+        uint rewardsClaimed;
+        uint validSince;
+    }
+    mapping (address => RewardContract[]) public rewardContract;
+
+    function createRewardContract() external returns (bool) {
+        uint256 currentSlot = (block.timestamp - genesis) / slotTime;
+        if(currentSlot <= nonce) return false;
+        Reward reward = new Reward();
+        if(address(reward).balance == 0) {
+            reward.withdraw(address(0));
+            return true;
+        }
+        uint t = (nonce * slotTime) / period;
+        uint i = (bitpeople.seed(t) + uint256(keccak256(abi.encode(nonce)))) % data[t].election.length;
+        address validator = data[t].election[i];
+
+        uint rewardContractIndex = rewardContract[validator].length-1;
+        while(rewardContract[validator][rewardContractIndex].validSince>t) { rewardContractIndex--; }
+        if(rewardContract[validator][rewardContractIndex].addr == address(0)) {
+            reward.withdraw(validator);
+            return true;
+        }
+        rewardContract[validator][rewardContractIndex].slotsRewarded.push(nonce);
+        nonce++; // Increment the nonce after creating the contract
+        return true;
+    }
 
     Bitpeople bitpeople = Bitpeople(0x0000000000000000000000000000000000000010);
 
