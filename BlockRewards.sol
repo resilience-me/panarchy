@@ -13,7 +13,7 @@ contract Election {
 
 contract Coinbase {
     address constant internal electionContract = 0x0000000000000000000000000000000000000011;
-    function withdraw(address rewardAddress) external {
+    function sendall(address rewardAddress) external {
         require(msg.sender == electionContract);
         selfdestruct(payable(rewardAddress));
     }
@@ -27,7 +27,7 @@ contract Schedule {
     function schedule() public view returns(uint) { return ((block.timestamp - genesis) / period); }
 }
 
-contract Rewards is Schedule {
+contract BlockRewards is Schedule {
 
     Bitpeople bitpeople = Bitpeople(0x0000000000000000000000000000000000000010);
     Election election = Election(0x0000000000000000000000000000000000000011);
@@ -35,33 +35,33 @@ contract Rewards is Schedule {
     uint constant public slotTime = 12;
     uint public nonce;
 
-    struct RewardContract {
+    struct RewardHandler {
         address addr;
         uint[] slotsRewarded;
         uint rewardsClaimed;
         uint validSince;
     }
-    mapping (address => RewardContract[]) public rewardContract;
+    mapping (address => RewardHandler[]) public rewardHandler;
 
     function createRewardContract() external returns (bool) {
         uint256 currentSlot = (block.timestamp - genesis) / slotTime;
         if(currentSlot <= nonce) return false;
         Coinbase coinbase = new Coinbase();
         if(address(coinbase).balance == 0) {
-            coinbase.withdraw(address(0));
+            coinbase.sendall(address(0));
             return true;
         }
         uint t = (nonce * slotTime) / period;
         uint i = (bitpeople.seed(t) + uint256(keccak256(abi.encode(nonce)))) % election.electionLength(t);
         address validator = election.election(t, i);
 
-        uint rewardContractIndex = rewardContract[validator].length-1;
-        while(rewardContract[validator][rewardContractIndex].validSince > t) { rewardContractIndex--; }
-        if(rewardContract[validator][rewardContractIndex].addr == address(0)) {
-            coinbase.withdraw(validator);
+        uint rewardHandlerIndex = rewardHandler[validator].length-1;
+        while(rewardHandler[validator][rewardHandlerIndex].validSince > t) { rewardHandlerIndex--; }
+        if(rewardHandler[validator][rewardHandlerIndex].addr == address(0)) {
+            coinbase.sendall(validator);
             return true;
         }
-        rewardContract[validator][rewardContractIndex].slotsRewarded.push(nonce);
+        rewardHandler[validator][rewardHandlerIndex].slotsRewarded.push(nonce);
         nonce++; // Increment the nonce after creating the contract
         return true;
     }
