@@ -13,7 +13,10 @@ contract Election {
 
 contract Coinbase {
     address constant internal electionContract = 0x0000000000000000000000000000000000000011;
-    function withdraw(address rewardAddress) external { require(msg.sender == electionContract); selfdestruct(payable(rewardAddress)); }
+    function withdraw(address rewardAddress) external {
+        require(msg.sender == electionContract);
+        selfdestruct(payable(rewardAddress));
+    }
 }
 
 contract Schedule {
