@@ -14,17 +14,9 @@ contract Schedule {
 }
 
 contract Reward {
-    address public rewardAddress;
-
-    constructor(address _rewardAddress) {
-        rewardAddress = _rewardAddress;
-    }
-
-    function withdraw() external {
-        require(msg.sender == rewardAddress, "Not authorized");
-        uint256 balance = address(this).balance;
-        rewardAddress.call{value: balance}("");
-    }
+    address payable public rewardAddress;
+    constructor(address _rewardAddress) { rewardAddress = _rewardAddress; }
+    function withdraw() external { require(msg.sender == rewardAddress); selfdestruct(rewardAddress); }
 }
 
 contract Election is Schedule {
