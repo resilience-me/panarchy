@@ -52,7 +52,7 @@ contract Election is Schedule {
     }
 
     function authorizeCoinbase(address coinbase, address validator) {
-        require(validatorContract[validator] == msg.sender);
+        require(msg.sender == validator || msg.sender == validatorContract[validator], "Authorization failed: caller is not the validator or authorized by the validator.");
         data[schedule()].coinbaseRegistry[validator][coinbase] = true;
     }
 
