@@ -13,7 +13,7 @@ contract Election {
 
 contract Coinbase {
     address constant internal blockRewardsContract = 0x0000000000000000000000000000000000000012;
-    function withdraw(address rewardAddress) external {
+    function sendAll(address rewardAddress) external {
         require(msg.sender == blockRewardsContract);
         selfdestruct(payable(rewardAddress));
     }
@@ -87,7 +87,7 @@ contract BlockRewards is Schedule {
         uint slot = coinbaseSlot(msg.sender);
         address cbaddr = coinbaseAddress(slot);
         Coinbase coinbase = Coinbase(cbaddr);
-        coinbase.withdraw(handlers[i].addr);
+        coinbase.sendAll(handlers[i].addr);
         return slot;
     }
 
@@ -96,7 +96,7 @@ contract BlockRewards is Schedule {
         if(currentSlot <= nonce) return false;
         Coinbase coinbase = new Coinbase();
         if(address(coinbase).balance == 0) {
-            coinbase.withdraw(address(0));
+            coinbase.sendAll(address(0));
             return true;
         }
         uint t = (nonce * slotTime) / period;
@@ -106,7 +106,7 @@ contract BlockRewards is Schedule {
         uint rewardHandlerIndex = rewardHandler[validator].length-1;
         while(rewardHandler[validator][rewardHandlerIndex].validSince > t) { rewardHandlerIndex--; }
         if(rewardHandler[validator][rewardHandlerIndex].addr == address(0)) {
-            coinbase.withdraw(validator);
+            coinbase.sendAll(validator);
             return true;
         }
         rewardHandler[validator][rewardHandlerIndex].slotsRewarded.push(nonce);
