@@ -54,7 +54,7 @@ contract BlockRewards is Schedule {
     function pendingCoinbase(address account) external returns (uint) {
         uint i = processedHandlers[account];
         RewardHandler[] storage handlers = rewardHandler[account];
-        require(handlers[i].slotsRewarded.length > handlers[i].rewardsClaimed);
+        if(handlers[i].slotsRewarded.length == handlers[i].rewardsClaimed) return 0;
         return handlers[i].slotsRewarded[handlers[i].rewardsClaimed];
     }
 
