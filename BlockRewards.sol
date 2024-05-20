@@ -42,6 +42,7 @@ contract BlockRewards is Schedule {
         uint validSince;
     }
     mapping (address => RewardHandler[]) public rewardHandler;
+    mapping (address => uint) public processedHandlers;
 
     function changeHandler(address addr) external {
         RewardHandler memory newHandler;
