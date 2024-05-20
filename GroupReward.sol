@@ -91,7 +91,6 @@ contract GroupReward {
         require(t > 0, "Cannot claim reward before period zero");
         t--;
         require(t < election.schedule(), "Cannot claim rewards for the current or future periods");
-
         Coinbase _coinbase = coinbase[t];
         require(address(_coinbase) != address(0), "Coinbase not set for this period");
         return _coinbase;
