@@ -45,7 +45,7 @@ contract Election is Schedule {
         Data storage currentData = data[t];
         require(!halftime(t), "Voting is only allowed before the halfway point.");
         require(currentData.balanceOf[msg.sender] >= 1, "Balance decrement failed: Insufficient balance");
-        if(coinbase != address(0)) require(currentData.coinbaseRegistry[validator][coinbase]);
+        if(coinbase != address(0)) require(currentData.coinbaseRegistry[validator][coinbase], "Coinbase not authorized");
         currentData.balanceOf[msg.sender]--;
         data[t+1].election.push(Elected(validator, coinbase));
         emit Elected(t+1, validator, coinbase);
