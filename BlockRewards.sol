@@ -51,7 +51,7 @@ contract BlockRewards is Schedule {
         rewardHandler[msg.sender].push(newHandler);
     }
 
-    function pendingCoinbase(address account) external returns (uint) {
+    function pendingCoinbase(address account) public returns (uint) {
         uint i = processedHandlers[account];
         RewardHandler[] storage handlers = rewardHandler[account];
         if(handlers[i].slotsRewarded.length == handlers[i].rewardsClaimed) return 0;
