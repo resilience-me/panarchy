@@ -51,9 +51,19 @@ contract BlockRewards is Schedule {
         rewardHandler[msg.sender].push(newHandler);
     }
 
-    function pendingCoinbase(address account) public returns (uint) {
+    function pendingCoinbase(address account) public returns (bool) {
         RewardHandler storage handler = rewardHandler[account][processedHandlers[account];
         return (handler.slotsRewarded.length > handler.rewardsClaimed);
+    }
+
+    function coinbaseSlot(address account) public returns (uint) {
+        RewardHandler storage handler = rewardHandler[account][processedHandlers[account];
+        require(handler.slotsRewarded.length > handler.rewardsClaimed, "Coinbase processing not synced");
+        return handler.slotsRewarded[handler.rewardsClaimed];
+    }
+
+    function coinbaseAddress(uint slot) public returns (address) {
+         return address(uint160(uint256(keccak256(abi.encodePacked(address(this), slot)))));
     }
 
     function syncCoinbase() external returns (bool) {
@@ -69,17 +79,14 @@ contract BlockRewards is Schedule {
         return true;
     }
 
-    function coinbaseAddress(uint slot) public returns (address) {
-         return address(uint160(uint256(keccak256(abi.encodePacked(address(this), slot)))));
-    }
-
     function processCoinbase() external returns (uint) {
         uint t = schedule();
         uint i = processedHandlers[msg.sender];
         RewardHandler[] storage handlers = rewardHandler[msg.sender];
         require(pendingCoinbase(msg.sender));
-        uint slot = 
-        Coinbase coinbase = Coinbase(coinbaseAddress(slot));
+        uint slot = coinbaseSlot(msg.sender);
+        address cbaddr = coinbaseAddress(slot);
+        Coinbase coinbase = Coinbase(cbaddr);
         coinbase.withdraw(handlers[i].addr);
         return slot;
     }
