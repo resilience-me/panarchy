@@ -18,7 +18,7 @@ contract Coinbase {
     }
 
     modifier onlyOwner() {
-        require(msg.sender == owner, "Only the validator can perform this action");
+        require(msg.sender == owner, "Only the owner can perform this action");
         _;
     }
 
@@ -42,6 +42,7 @@ contract Coinbase {
         (bool success, ) = voter.call{value: reward}("");
         require(success, "Transfer failed.");
     }
+
     function claimValidatorReward(address validator) external onlyOwner {
         initRewards();
         uint _validatorReward = validatorReward;
@@ -70,7 +71,7 @@ contract GroupReward {
     }
 
     function initCoinbase(uint t) internal {
-        if (address(coinbase[t]) == address(0)) {
+        if(address(coinbase[t]) == address(0)) {
             coinbase[t] = new Coinbase(address(this), voterShare);
         }
     }
