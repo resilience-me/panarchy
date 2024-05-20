@@ -71,18 +71,18 @@ contract GroupReward {
 
     function initCoinbase(uint t) internal {
         if (address(coinbase[t]) == address(0)) {
-            coinbase[t] = new Coinbase(this, voterShare);
+            coinbase[t] = new Coinbase(address(this), voterShare);
         }
     }
 
     function vote(address voter) external {
         uint t = election.schedule() + 1;
         initCoinbase(t);
-        Coinbase coinbase = coinbase[t];
+        Coinbase _coinbase = coinbase[t];
         require(election.allowance(t, voter, address(this)) >= 1, "Insufficient allowance to vote");
         election.transferFrom(voter, address(this), 1);
-        coinbase[t].recordVote(voter);
-        election.vote(validator, address(coinbase));
+        _coinbase.recordVote(voter);
+        election.vote(validator, address(_coinbase));
     }
 
     function claimReward() external {
@@ -90,19 +90,19 @@ contract GroupReward {
         require(t > 0, "Cannot claim reward for the current period");
         t--; // Claim reward for the previous period
 
-        Coinbase coinbase = coinbaseForPeriod[t];
-        require(address(coinbase) != address(0), "Coinbase not set for this period");
+        Coinbase _coinbase = coinbase[t];
+        require(address(_coinbase) != address(0), "Coinbase not set for this period");
 
-        coinbase.claimReward(msg.sender);
+        _coinbase.claimReward(msg.sender);
     }
 
     function claimValidatorReward(uint t, address validator) external onlyValidator {
         require(t > 0, "Cannot claim reward for the current period");
         t--; // Claim reward for the previous period
 
-        Coinbase coinbase = coinbaseForPeriod[t];
-        require(address(coinbase) != address(0), "Coinbase not set for this period");
+        Coinbase _coinbase = coinbase[t];
+        require(address(_coinbase) != address(0), "Coinbase not set for this period");
 
-        coinbase.claimValidatorReward(validator);
+        _coinbase.claimValidatorReward(validator);
     }
 }
