@@ -1,3 +1,7 @@
+// Will likely be adding ability to automate validator rewards to voters, current work on that in code below. Was previously 
+// skipping it and leaving it to be done manually, mostly because the Geth consensus engine interface seemed to not support it well 
+// (was no way to read state during prepare for example) but found a few good workarounds
+
 contract Bitpeople { function proofOfUniqueHuman(uint t, address account) external view returns (bool) {} }
 
 contract Schedule {
@@ -14,27 +18,46 @@ contract Election is Schedule {
 
     Bitpeople bitpeople = Bitpeople(0x0000000000000000000000000000000000000010);
 
+    struct Elected {
+        address validator;
+        address coinbase;
+    }
+
     struct Data {
-        address[] election;
+        Elected[] election;
+        mapping (address => mapping (address => bool)) coinbaseRegistry;
         mapping (address => uint) balanceOf;
         mapping (address => mapping (address => uint)) allowance;
         mapping (address => bool) claimedSuffrageToken;
     }
-
+    
     mapping (uint => Data) data;
 
-    event Elected(uint indexed schedule, address indexed validator);
+    mapping (address => address) validatorContract;
+
+    event Elected(uint indexed schedule, address indexed validator, address indexed coinbase);
 
     event Transfer(uint indexed schedule, address indexed from, address indexed to, uint256 value);
     event Approval(uint indexed schedule, address indexed owner, address indexed spender, uint256 value);
 
-    function vote(address validator) external {
+    function vote(address validator, address coinbase) external {
         uint t = schedule();
+        Data storage currentData = data[t];
         require(!halftime(t), "Voting is only allowed before the halfway point.");
-        require(data[t].balanceOf[msg.sender] >= 1, "Balance decrement failed: Insufficient balance");
-        data[t].balanceOf[msg.sender]--;
-        data[t+1].election.push(validator);
-        emit Elected(t+1, validator);
+        require(currentData.balanceOf[msg.sender] >= 1, "Balance decrement failed: Insufficient balance");
+        if(coinbase != address(0)) require(currentData.coinbaseRegistry[validator][coinbase]);
+        currentData.balanceOf[msg.sender]--;
+        data[t+1].election.push(Elected(validator, coinbase));
+        emit Elected(t+1, validator, coinbase);
+    }
+
+    function authorizeCoinbase(address coinbase, address validator) {
+        require(validatorContract[validator] == msg.sender);
+        data[schedule()].coinbaseRegistry[validator][coinbase] = true;
+    }
+
+    function authorizeValidatorContract(address validatorContract) {
+        validatorContract[msg.sender] = validatorContract;
     }
 
     function allocateSuffrageToken() external {
