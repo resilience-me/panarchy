@@ -78,15 +78,9 @@ contract GroupReward {
         uint t = election.schedule() + 1;
         initCoinbase(t);
         Coinbase coinbase = coinbase[t];
-        require(election.balanceOf(t, voter) >= 1, "Insufficient balance to vote");
-
-        // Transfer suffrage token to the contract
+        require(election.allowance(t, voter, address(this)) >= 1, "Insufficient allowance to vote");
         election.transferFrom(voter, address(this), 1);
-
-        // Record the vote
-        coinbase.recordVote(voter);
-
-        // Cast the vote
+        coinbase[t].recordVote(voter);
         election.vote(validator, address(coinbase));
     }
 
