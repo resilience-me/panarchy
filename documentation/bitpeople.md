@@ -112,8 +112,7 @@ People commit their random number when they register for the event, `register(by
         require(quarter(t) == 2, "Operation must be performed in the third quarter");
         require(previousData.nym[msg.sender].verified, "Nym must be verified");
         require(keccak256(abi.encode(preimage)) == previousData.commit[msg.sender], "Preimage does not match the committed hash");
-        bytes32 mutated = keccak256(abi.encode(preimage, previousData.seed));
-        uint id = uint(mutated)%previousData.registry.length;
+        uint id = (previousData.nym[msg.sender].id+uint(preimage))%previousData.registry.length;
         currentData.points[id]++;
         if (currentData.points[id] > currentData.points[currentData.seed]) currentData.seed = id;
         delete previousData.commit[msg.sender];
