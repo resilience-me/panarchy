@@ -86,20 +86,20 @@ contract GroupReward {
         election.vote(validator, address(_coinbase));
     }
 
-    function claimReward() external {
-        uint t = election.schedule();
+    function _claimReward(uint t) internal returns (Coinbase) {
+        if(t == 0) t = election.schedule();
+        require(t <= election.schedule(), "Cannot claim reward for a future period");
         require(t > 0, "Cannot claim reward before period zero");
         t--;
         Coinbase _coinbase = coinbase[t];
         require(address(_coinbase) != address(0), "Coinbase not set for this period");
-        _coinbase.claimReward(msg.sender);
+        return _coinbase;
+    }
+    function claimReward(uint t) external {
+        _claimReward(t).claimReward(msg.sender);
     }
 
-    function claimValidatorReward(uint t, address validator) external onlyValidator {
-        require(t > 0, "Cannot claim reward for the current period");
-        t--; // Claim reward for the previous period
-        Coinbase _coinbase = coinbase[t];
-        require(address(_coinbase) != address(0), "Coinbase not set for this period");
-        _coinbase.claimValidatorReward(validator);
+    function claimValidatorReward(uint t) external onlyValidator {
+        _claimReward(t).claimValidatorReward(validator);
     }
 }
