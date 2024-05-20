@@ -43,7 +43,7 @@ contract Election is Schedule {
     function vote(address validator, address coinbase) external {
         uint t = schedule();
         Data storage currentData = data[t];
-        require(!halftime(t), "Voting is only allowed before the halfway point.");
+        require(!halftime(t), "Voting is only allowed before the halfway point");
         require(currentData.balanceOf[msg.sender] >= 1, "Balance decrement failed: Insufficient balance");
         if(coinbase != address(0)) require(currentData.coinbaseRegistry[validator][coinbase], "Coinbase not authorized");
         currentData.balanceOf[msg.sender]--;
@@ -52,7 +52,7 @@ contract Election is Schedule {
     }
 
     function authorizeCoinbase(address coinbase, address validator) external {
-        require(msg.sender == validator || msg.sender == validatorContract[validator], "Authorization failed: caller is not the validator or authorized by the validator.");
+        require(msg.sender == validator || msg.sender == validatorContract[validator], "Authorization failed: caller is not the validator or authorized by the validator");
         data[schedule()].coinbaseRegistry[validator][coinbase] = true;
     }
 
@@ -62,8 +62,8 @@ contract Election is Schedule {
 
     function allocateSuffrageToken() external {
         uint t = schedule();
-        require(bitpeople.proofOfUniqueHuman(t, msg.sender), "Failed to verify proof-of-unique-human.");
-        require(!data[t].claimedSuffrageToken[msg.sender], "Suffrage token already claimed.");
+        require(bitpeople.proofOfUniqueHuman(t, msg.sender), "Failed to verify proof-of-unique-human");
+        require(!data[t].claimedSuffrageToken[msg.sender], "Suffrage token already claimed");
         data[t].balanceOf[msg.sender]++;
         data[t].claimedSuffrageToken[msg.sender] = true;
     }
