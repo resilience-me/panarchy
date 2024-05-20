@@ -12,9 +12,9 @@ contract Election {
 }
 
 contract Coinbase {
-    address constant internal electionContract = 0x0000000000000000000000000000000000000011;
+    address constant internal blockRewardsContract = 0x0000000000000000000000000000000000000012;
     function sendall(address rewardAddress) external {
-        require(msg.sender == electionContract);
+        require(msg.sender == blockRewardsContract);
         selfdestruct(payable(rewardAddress));
     }
 }
@@ -52,8 +52,9 @@ contract BlockRewards is Schedule {
         while(handlers[i].slotsRewarded.length == handlers[i].rewardsClaimed && handlers.length > i && handlers[i+1].validSince > t ) {
             i++;
         }
-        if(i>processedHandlers[msg.sender]) processedHandlers[msg.sender] = i;
-
+        if(i > processedHandlers[msg.sender]) processedHandlers[msg.sender] = i;
+        uint slot = handlers[i].slotsRewarded[rewardsClaimed];
+        
     }
 
     function createRewardContract() external returns (bool) {
