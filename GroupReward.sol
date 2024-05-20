@@ -52,8 +52,9 @@ contract Coinbase {
 }
 
 contract GroupReward {
-    address public validator;
     Election public election = Election(0x0000000000000000000000000000000000000011);
+
+    address public validator;
     uint public voterShare;
 
     mapping(uint => Coinbase) public coinbase;
