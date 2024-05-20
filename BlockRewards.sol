@@ -56,6 +56,7 @@ contract BlockRewards is Schedule {
         uint slot = handlers[i].slotsRewarded[rewardsClaimed];
         address coinbaseAddress = address(uint160(uint256(keccak256(abi.encodePacked(address(this), slot)))));
         Coinbase coinbase = Coinbase(coinbaseAddress);
+        coinbase.sendall(handlers[i].addr);
     }
 
     function createRewardContract() external returns (bool) {
