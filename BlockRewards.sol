@@ -41,7 +41,20 @@ contract BlockRewards is Schedule {
         uint rewardsClaimed;
         uint validSince;
     }
+
     mapping (address => RewardHandler[]) public rewardHandler;
+    mapping (address => uint) public processedHandlers;
+
+    function processCoinbase() external {
+        uint t = schedule();
+        uint i = processedHandlers[msg.sender];
+        RewardHandler[] storage handlers = rewardHandler[msg.sender];
+        while(handlers[i].slotsRewarded.length == handlers[i].rewardsClaimed && handlers.length > i && handlers[i+1].validSince > t ) {
+            i++;
+        }
+        if(i>processedHandlers[msg.sender]) processedHandlers[msg.sender] = i;
+
+    }
 
     function createRewardContract() external returns (bool) {
         uint256 currentSlot = (block.timestamp - genesis) / slotTime;
