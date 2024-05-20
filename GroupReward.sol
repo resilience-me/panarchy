@@ -12,8 +12,8 @@ contract Coinbase {
     uint public validatorReward;
     uint public voterShare;
 
-    constructor(address validatorContract, uint _voterShare) {
-        owner = validatorContract;
+    constructor(address _owner, uint _voterShare) {
+        owner = _owner;
         voterShare = _voterShare;
     }
 
