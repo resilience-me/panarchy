@@ -45,18 +45,31 @@ contract BlockRewards is Schedule {
     mapping (address => RewardHandler[]) public rewardHandler;
     mapping (address => uint) public processedHandlers;
 
-    function processCoinbase() external {
+    function syncCoinbase() external returns (bool) {
         uint t = schedule();
         uint i = processedHandlers[msg.sender];
         RewardHandler[] storage handlers = rewardHandler[msg.sender];
-        while(handlers[i].slotsRewarded.length == handlers[i].rewardsClaimed && handlers.length > i && handlers[i+1].validSince > t ) {
-            i++;
+        if(handlers[i].slotsRewarded.length == handlers[i].rewardsClaimed) {
+            if(handlers.length > i && handlers[i+1].validSince > t) {
+                processedHandlers[msg.sender]++;
+                return false;
+            }
         }
-        if(i > processedHandlers[msg.sender]) processedHandlers[msg.sender] = i;
+        return true;
+    }
+
+    function processCoinbase() external returns (uint) {
+        uint t = schedule();
+        uint i = processedHandlers[msg.sender];
+        RewardHandler[] storage handlers = rewardHandler[msg.sender];
+
+        if(handlers[i].slotsRewarded.length == handlers[i].rewardsClaimed) return 0;
+
         uint slot = handlers[i].slotsRewarded[rewardsClaimed];
         address coinbaseAddress = address(uint160(uint256(keccak256(abi.encodePacked(address(this), slot)))));
         Coinbase coinbase = Coinbase(coinbaseAddress);
         coinbase.sendall(handlers[i].addr);
+        return slot;
     }
 
     function createRewardContract() external returns (bool) {
