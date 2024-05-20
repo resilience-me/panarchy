@@ -50,3 +50,64 @@ contract Coinbase {
         require(success, "Validator transfer failed.");
     }
 }
+
+contract GroupReward {
+    address public validator;
+    Election public election = Election(0x0000000000000000000000000000000000000011);
+    uint public voterShare;
+
+    mapping(uint => Coinbase) public coinbase;
+
+    constructor(address _validator, uint _voterShare) {
+        validator = _validator;
+        voterShare = _voterShare;
+    }
+
+    modifier onlyValidator() {
+        require(msg.sender == validator, "Only the validator can perform this action");
+        _;
+    }
+
+    function initCoinbase(uint t) internal {
+        if (address(coinbase[t]) == address(0)) {
+            coinbase[t] = new Coinbase(this, voterShare);
+        }
+    }
+
+    function vote(address voter) external {
+        uint t = election.schedule() + 1;
+        initCoinbase(t);
+        Coinbase coinbase = coinbase[t];
+        require(election.balanceOf(t, voter) >= 1, "Insufficient balance to vote");
+
+        // Transfer suffrage token to the contract
+        election.transferFrom(voter, address(this), 1);
+
+        // Record the vote
+        coinbase.recordVote(voter);
+
+        // Cast the vote
+        election.vote(validator, address(coinbase));
+    }
+
+    function claimReward() external {
+        uint t = election.schedule();
+        require(t > 0, "Cannot claim reward for the current period");
+        t--; // Claim reward for the previous period
+
+        Coinbase coinbase = coinbaseForPeriod[t];
+        require(address(coinbase) != address(0), "Coinbase not set for this period");
+
+        coinbase.claimReward(msg.sender);
+    }
+
+    function claimValidatorReward(uint t, address validator) external onlyValidator {
+        require(t > 0, "Cannot claim reward for the current period");
+        t--; // Claim reward for the previous period
+
+        Coinbase coinbase = coinbaseForPeriod[t];
+        require(address(coinbase) != address(0), "Coinbase not set for this period");
+
+        coinbase.claimValidatorReward(validator);
+    }
+}
