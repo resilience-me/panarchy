@@ -93,7 +93,7 @@ contract GroupReward {
         election.vote(validator, address(_coinbase));
     }
 
-    function _claimReward(uint t) internal returns (Coinbase) {
+    function _claimReward(uint t) internal view returns (Coinbase) {
         if(t == 0) t = election.schedule();
         require(t > 0, "Cannot claim reward before period zero");
         t--;
