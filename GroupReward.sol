@@ -5,24 +5,24 @@
 // choose to give everything to voters. )
 
 contract Coinbase {
-    address public validator;
+    address public validatorContract;
     mapping(address => uint) public votes;
     uint public totalVotes;
     uint public voterReward;
     uint public validatorReward;
     uint public voterShare;
 
-    constructor(address _validator, uint _voterShare) {
-        validator = _validator;
+    constructor(address _validatorContract, uint _voterShare) {
+        validatorContract = _validatorContract;
         voterShare = _voterShare;
     }
 
-    modifier onlyValidator() {
-        require(msg.sender == validator, "Only the validator can perform this action");
+    modifier onlyValidatorContract() {
+        require(msg.sender == validatorContract, "Only the validator can perform this action");
         _;
     }
 
-    function recordVote(address voter) external onlyValidator {
+    function recordVote(address voter) external onlyValidatorContract {
         votes[voter]++;
         totalVotes++;
     }
@@ -35,14 +35,14 @@ contract Coinbase {
         }
     }
 
-    function claimReward(address voter) external onlyValidator {
+    function claimReward(address voter) external onlyValidatorContract {
         initRewards();
         uint reward = (voterReward * votes[voter]) / totalVotes;
         delete votes[voter];
         (bool success, ) = voter.call{value: reward}("");
         require(success, "Transfer failed.");
     }
-    function claimValidatorReward() external onlyValidator {
+    function claimValidatorReward(address validator) external onlyValidatorContract {
         initRewards();
         uint _validatorReward = validatorReward;
         delete validatorReward;
