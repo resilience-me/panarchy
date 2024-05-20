@@ -25,7 +25,6 @@ contract Election is Schedule {
 
     struct Data {
         Elected[] election;
-        mapping (address => mapping (address => bool)) coinbaseRegistry;
         mapping (address => uint) balanceOf;
         mapping (address => mapping (address => uint)) allowance;
         mapping (address => bool) claimedSuffrageToken;
@@ -45,15 +44,10 @@ contract Election is Schedule {
         Data storage currentData = data[t];
         require(!halftime(t), "Voting is only allowed before the halfway point");
         require(currentData.balanceOf[msg.sender] >= 1, "Balance decrement failed: Insufficient balance");
-        if(coinbase != address(0)) require(currentData.coinbaseRegistry[validator][coinbase], "Coinbase not authorized");
+        if(coinbase != address(0)) require(msg.sender == validatorContract[validator], "Caller is not authorized to set up coinbase");
         currentData.balanceOf[msg.sender]--;
         data[t+1].election.push(Elected(validator, coinbase));
         emit Elected(t+1, validator, coinbase);
-    }
-
-    function authorizeCoinbase(address coinbase, address validator) external {
-        require(msg.sender == validator || msg.sender == validatorContract[validator], "Authorization failed: caller is not the validator or authorized by the validator");
-        data[schedule()].coinbaseRegistry[validator][coinbase] = true;
     }
 
     function authorizeValidatorContract(address validatorContract) external {
