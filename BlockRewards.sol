@@ -80,11 +80,11 @@ contract BlockRewards is Schedule {
     }
 
     function processCoinbase() external returns (uint) {
-        RewardHandler storage handler = rewardHandler[msg.sender][processedHandlers[msg.sender];
         require(pendingCoinbase(msg.sender));
         uint slot = coinbaseSlot(msg.sender);
         address cbaddr = coinbaseAddress(slot);
         Coinbase coinbase = Coinbase(cbaddr);
+        RewardHandler storage handler = rewardHandler[msg.sender][processedHandlers[msg.sender];
         coinbase.sendAll(handler.addr);
         handler.rewardsClaimed++;
         return slot;
