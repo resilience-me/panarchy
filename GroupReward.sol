@@ -42,4 +42,11 @@ contract Coinbase {
         (bool success, ) = voter.call{value: reward}("");
         require(success, "Transfer failed.");
     }
+    function claimValidatorReward() external onlyValidator {
+        initRewards();
+        uint _validatorReward = validatorReward;
+        delete validatorReward;
+        (bool success, ) = validator.call{value: _validatorReward}("");
+        require(success, "Validator transfer failed.");
+    }
 }
