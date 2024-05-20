@@ -89,7 +89,7 @@ contract GroupReward {
     function claimReward() external {
         uint t = election.schedule();
         require(t > 0, "Cannot claim reward before period zero");
-        t--; // Claim reward for the previous period
+        t--;
 
         Coinbase _coinbase = coinbase[t];
         require(address(_coinbase) != address(0), "Coinbase not set for this period");
