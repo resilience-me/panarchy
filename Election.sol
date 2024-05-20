@@ -1,7 +1,3 @@
-// Will likely be adding ability to automate validator rewards to voters, current work on that in code below. Was previously 
-// skipping it and leaving it to be done manually, mostly because the Geth consensus engine interface seemed to not support it well 
-// (was no way to read state during prepare for example) but found a few good workarounds
-
 contract Bitpeople { function proofOfUniqueHuman(uint t, address account) external view returns (bool) {} }
 
 contract Schedule {
@@ -18,13 +14,13 @@ contract Election is Schedule {
 
     Bitpeople bitpeople = Bitpeople(0x0000000000000000000000000000000000000010);
 
-    struct Elected {
+    struct Vote {
         address validator;
         address coinbase;
     }
 
     struct Data {
-        Elected[] election;
+        Vote[] election;
         mapping (address => uint) balanceOf;
         mapping (address => mapping (address => uint)) allowance;
         mapping (address => bool) claimedSuffrageToken;
@@ -46,12 +42,12 @@ contract Election is Schedule {
         require(currentData.balanceOf[msg.sender] >= 1, "Balance decrement failed: Insufficient balance");
         if(coinbase != address(0)) require(msg.sender == validatorContract[validator], "Caller is not authorized to set up coinbase");
         currentData.balanceOf[msg.sender]--;
-        data[t+1].election.push(Elected(validator, coinbase));
+        data[t+1].election.push(Vote(validator, coinbase));
         emit Elected(t+1, validator, coinbase);
     }
 
-    function authorizeValidatorContract(address validatorContract) external {
-        validatorContract[msg.sender] = validatorContract;
+    function authorizeValidatorContract(address _validatorContract) external {
+        validatorContract[msg.sender] = _validatorContract;
     }
 
     function allocateSuffrageToken() external {
@@ -83,7 +79,7 @@ contract Election is Schedule {
         data[t].allowance[from][msg.sender] -= value;
     }
 
-    function election(uint t, uint i) external view returns (address) { return data[t].election[i]; }
+    function election(uint t, uint i) external view returns (Vote memory) { return data[t].election[i]; }
     function electionLength(uint t) external view returns (uint) { return data[t].election.length; }
     function balanceOf(uint t, address account) external view returns (uint) { return data[t].balanceOf[account]; }
     function allowance(uint t, address owner, address spender) external view returns (uint) { return data[t].allowance[owner][spender]; }
