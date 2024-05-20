@@ -54,7 +54,8 @@ contract BlockRewards is Schedule {
         }
         if(i > processedHandlers[msg.sender]) processedHandlers[msg.sender] = i;
         uint slot = handlers[i].slotsRewarded[rewardsClaimed];
-        
+        address coinbaseAddress = address(uint160(uint256(keccak256(abi.encodePacked(address(this), slot)))));
+        Coinbase coinbase = Coinbase(coinbaseAddress);
     }
 
     function createRewardContract() external returns (bool) {
