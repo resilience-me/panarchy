@@ -69,13 +69,17 @@ contract BlockRewards is Schedule {
         return true;
     }
 
+    function coinbaseAddress(uint slot) public returns (address) {
+         return address(uint160(uint256(keccak256(abi.encodePacked(address(this), slot)))));
+    }
+
     function processCoinbase() external returns (uint) {
         uint t = schedule();
         uint i = processedHandlers[msg.sender];
         RewardHandler[] storage handlers = rewardHandler[msg.sender];
-        uint slot = pendingCoinbase(address account);
-        address coinbaseAddress = address(uint160(uint256(keccak256(abi.encodePacked(address(this), slot)))));
-        Coinbase coinbase = Coinbase(coinbaseAddress);
+        require(pendingCoinbase(msg.sender));
+        uint slot = 
+        Coinbase coinbase = Coinbase(coinbaseAddress(slot));
         coinbase.withdraw(handlers[i].addr);
         return slot;
     }
