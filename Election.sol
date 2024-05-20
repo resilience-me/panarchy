@@ -20,7 +20,7 @@ contract Election is Schedule {
     }
 
     struct Data {
-        Vote[] election;
+        Vote[] votes;
         mapping (address => uint) balanceOf;
         mapping (address => mapping (address => uint)) allowance;
         mapping (address => bool) claimedSuffrageToken;
@@ -42,7 +42,7 @@ contract Election is Schedule {
         require(currentData.balanceOf[msg.sender] >= 1, "Balance decrement failed: Insufficient balance");
         if(coinbase != address(0)) require(msg.sender == validatorContract[validator], "Caller is not authorized to set up coinbase");
         currentData.balanceOf[msg.sender]--;
-        data[t+1].election.push(Vote(validator, coinbase));
+        data[t+1].votes.push(Vote(validator, coinbase));
         emit Elected(t+1, validator, coinbase);
     }
 
@@ -79,8 +79,8 @@ contract Election is Schedule {
         data[t].allowance[from][msg.sender] -= value;
     }
 
-    function election(uint t, uint i) external view returns (Vote memory) { return data[t].election[i]; }
-    function electionLength(uint t) external view returns (uint) { return data[t].election.length; }
+    function votes(uint t, uint i) external view returns (Vote memory) { return data[t].votes[i]; }
+    function votesLength(uint t) external view returns (uint) { return data[t].votes.length; }
     function balanceOf(uint t, address account) external view returns (uint) { return data[t].balanceOf[account]; }
     function allowance(uint t, address owner, address spender) external view returns (uint) { return data[t].allowance[owner][spender]; }
     function claimedSuffrageToken(uint t, address account) external view returns (bool) { return data[t].claimedSuffrageToken[account]; }
