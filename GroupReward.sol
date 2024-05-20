@@ -8,10 +8,13 @@ contract Coinbase {
     address public validator;
     mapping(address => uint) public votes;
     uint public totalVotes;
-    uint public balance;
+    uint public voterReward;
+    uint public validatorReward;
+    uint public voterShare;
 
-    constructor(address _validator) {
+    constructor(address _validator, uint _voterShare) {
         validator = _validator;
+        voterShare = _voterShare;
     }
 
     modifier onlyValidator() {
@@ -24,10 +27,17 @@ contract Coinbase {
         totalVotes++;
     }
 
-    function claimReward(address voter) external onlyValidator {
-        if (balance == 0) { balance = address(this).balance; }
+    function initRewards() public {
+        if(voterReward == 0 && validatorReward == 0) {
+            uint balance = address(this).balance;
+            voterReward = (balance * voterShare) / 10000;
+            validatorReward = balance - voterReward;
+        }
+    }
 
-        uint reward = (balance * votes[voter]) / totalVotes;
+    function claimReward(address voter) external onlyValidator {
+        initRewards();
+        uint reward = (voterReward * votes[voter]) / totalVotes;
         delete votes[voter];
         (bool success, ) = voter.call{value: reward}("");
         require(success, "Transfer failed.");
