@@ -4,6 +4,13 @@
 // on all voters during a period. This contract is for the group version. Also note, part of the reward goes to validator (unless they
 // choose to give everything to voters. )
 
+interface Election {
+    function schedule() external view returns (uint);
+    function vote(address validator, address coinbase) external;
+    function transferFrom(address from, address to, uint256 value) external;
+    function allowance(uint t, address owner, address spender) external view returns (uint);
+}
+
 contract Coinbase {
     address public owner;
     mapping(address => uint) public votes;
