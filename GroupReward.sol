@@ -1,5 +1,8 @@
 // An example contract for how validator could manage group rewards. These reward contracts are custom and written or chosen by validators, 
 // the Panarchy system does not enforce any standard. I just provide this as an example (and anyone can use it of course. )
+// The two most basic categories of voter reward schemes is to send voter reward to the voter who elected validator, or, distribute
+// on all voters during a period. This contract is for the group version. Also note, part of the reward goes to validator (unless they
+// choose to give everything to voters. )
 
 contract Coinbase {
     address public validator;
