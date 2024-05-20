@@ -51,12 +51,12 @@ contract Election is Schedule {
         emit Elected(t+1, validator, coinbase);
     }
 
-    function authorizeCoinbase(address coinbase, address validator) {
+    function authorizeCoinbase(address coinbase, address validator) external {
         require(msg.sender == validator || msg.sender == validatorContract[validator], "Authorization failed: caller is not the validator or authorized by the validator.");
         data[schedule()].coinbaseRegistry[validator][coinbase] = true;
     }
 
-    function authorizeValidatorContract(address validatorContract) {
+    function authorizeValidatorContract(address validatorContract) external {
         validatorContract[msg.sender] = validatorContract;
     }
 
