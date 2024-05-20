@@ -41,16 +41,13 @@ contract BlockRewards is Schedule {
         uint rewardsClaimed;
         uint validSince;
     }
-    mapping (address => RewardHandler[2]) public rewardHandler;
+    mapping (address => RewardHandler[]) public rewardHandler;
 
     function changeHandler(address addr) external {
-        uint t = schedule();
-        require(rewardHandler[msg.sender][0].slotsRewarded.length == rewardHandler[msg.sender][0].rewardsClaimed);
-        require(rewardHandler[msg.sender][1].validSince <= t);
-        rewardHandler[msg.sender][0] = rewardHandler[msg.sender][1];
-        delete rewardHandler[msg.sender][1];
-        rewardHandler[msg.sender][1].addr = addr;
-        rewardHandler[msg.sender][1].validSince = t+2;
+        RewardHandler memory newHandler;
+        newHandler.addr = addr;
+        newHandler.validSince = schedule();
+        rewardHandler[msg.sender].push(newHandler);
     }
 
     function syncCoinbase() external returns (bool) {
