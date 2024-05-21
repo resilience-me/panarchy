@@ -266,7 +266,7 @@ func (p *Panarchy) Seal(chain consensus.ChainHeaderReader, block *types.Block, r
 			}
 		}
 		coinbase := p.getCoinbase(voteSlot, cachedState.state)
-		if coinbase == common.Address{} {
+		if coinbase == (common.Address{}) {
 			coinbase = validator
 		}
 		balance := state.GetBalance(header.Coinbase)
