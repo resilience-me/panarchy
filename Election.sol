@@ -30,7 +30,7 @@ contract Election is Schedule {
 
     mapping (address => address) validatorContract;
 
-    event Elected(uint indexed schedule, address indexed validator, address indexed coinbase);
+    event Voted(uint indexed schedule, address indexed validator, address indexed coinbase);
 
     event Transfer(uint indexed schedule, address indexed from, address indexed to, uint256 value);
     event Approval(uint indexed schedule, address indexed owner, address indexed spender, uint256 value);
@@ -43,7 +43,7 @@ contract Election is Schedule {
         if(coinbase != address(0)) require(msg.sender == validatorContract[validator], "Caller is not authorized to set up coinbase");
         currentData.balanceOf[msg.sender]--;
         data[t+1].votes.push(Vote(validator, coinbase));
-        emit Elected(t+1, validator, coinbase);
+        emit Voted(t+1, validator, coinbase);
     }
 
     function authorizeValidatorContract(address _validatorContract) external {
