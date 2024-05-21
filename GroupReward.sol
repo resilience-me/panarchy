@@ -85,13 +85,13 @@ contract GroupReward {
         }
     }
 
-    function vote(address voter) external {
+    function vote() external {
         uint t = election.schedule() + 1;
         initCoinbase(t);
         Coinbase _coinbase = coinbase[t];
-        require(election.allowance(t, voter, address(this)) >= 1, "Insufficient allowance to vote");
-        election.transferFrom(voter, address(this), 1);
-        _coinbase.recordVote(voter);
+        require(election.allowance(t, msg.sender, address(this)) >= 1, "Insufficient allowance to vote");
+        election.transferFrom(msg.sender, address(this), 1);
+        _coinbase.recordVote(msg.sender);
         election.vote(validator, address(_coinbase));
     }
 
