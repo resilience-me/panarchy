@@ -59,10 +59,9 @@ contract SingleReward {
         if (address(coinbase[voter]) == address(0)) {
             coinbase[voter] = new Coinbase(address(this), voter, validator, voterShare);
         }
-        Coinbase _coinbase = coinbase[voter];
         require(election.allowance(t, voter, address(this)) >= 1, "Insufficient allowance to vote");
         election.transferFrom(voter, address(this), 1);
-        election.vote(validator, address(_coinbase));
+        election.vote(validator, address(coinbase[voter]));
     }
 
     function claimReward() external {
