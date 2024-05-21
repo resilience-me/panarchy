@@ -371,13 +371,15 @@ func (p *Panarchy) getVote(header *types.Header, skipped *big.Int, state *state.
 	return votesArray
 }
 func (p *Panarchy) getValidator(voteSlot *big.Int, state *state.StateDB) common.Address {
-	validatorSlot := common.BytesToHash(voteSlot).Bytes())
-	return state.GetState(electionContract, validatorSlot)
+	validatorSlot := common.BytesToHash(voteSlot.Bytes())
+	validator := state.GetState(electionContract, validatorSlot)
+	return common.BytesToAddress(validator.Bytes())
 }
 func (p *Panarchy) getCoinbase(voteSlot *big.Int, state *state.StateDB) common.Address {
 	voteSlot.Add(voteSlot, common.Big1)
 	coinbaseSlot := common.BytesToHash(voteSlot.Bytes())
-	return state.GetState(electionContract, coinbaseSlot)
+	coinbase := state.GetState(electionContract, coinbaseSlot)
+	return common.BytesToAddress(coinbase.Bytes())
 }
 
 func (p *Panarchy) Authorize(signer common.Address, signFn SignerFn) {
