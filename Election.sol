@@ -1,4 +1,4 @@
-contract Bitpeople { function proofOfUniqueHuman(uint t, address account) external view returns (bool) {} }
+interface Bitpeople { function proofOfUniqueHuman(uint t, address account) external view returns (bool); }
 
 contract Schedule {
 
