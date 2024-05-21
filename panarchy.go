@@ -36,6 +36,7 @@ var (
 	errFailedStatePassToSeal    	= errors.New("Failed to pass state object to Seal. Go-Ethereum consensus engine interface is not perfect fit for Panarchy engine, so we provide the state object to Seal in an unconventional way. We add this error check if it were to fail for some reason.")
 	errHeaderOlderThanCheckpoint 	= errors.New("Header is older than checkpoint and will therefore be rejected")
 	errValidatorNotElected      	= errors.New("Validator is not elected to sign the block")
+	errWrongCoinbase	      	= errors.New("Coinbase is not the one registered in Election contract")
 )
 
 const (
@@ -45,7 +46,7 @@ const (
 
 var (
 	seedSlot		= make([]byte, 32)
-	electionSlot		= []byte{31: 1}
+	votesSlot		= []byte{31: 1}
 	bitpeopleContract	= common.Address{19: 0x10}
 	electionContract	= common.Address{19: 0x11}
 )
@@ -184,25 +185,35 @@ func (p *Panarchy) Prepare(chain consensus.ChainHeaderReader, header *types.Head
 	}
 	p.updateCheckpoint(header.Time)
 	header.Difficulty = p.CalcDifficulty(chain, header.Time, parent)
+	header.Coinbase = electionContract
 	return nil
 }
 
 func (p *Panarchy) Finalize(chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, withdrawals []*types.Withdrawal) {
-	if err := p.verifySeal(header, state); err != nil {
+	if err := p.verifySealAndCoinbase(header, state); err != nil {
 		header.GasUsed=0
 		log.Error("Error in Finalize. Will now force ValidateState to fail by altering block.Header.GasUsed")
 	}
 	mutations.AccumulateRewards(chain.Config(), state, header, uncles)
 }
 
-func (p *Panarchy) verifySeal(header *types.Header, state *state.StateDB) error {
+func (p *Panarchy) verifySealAndCoinbase(header *types.Header, state *state.StateDB) error {
 	signer, err := p.Author(header)
 	if err != nil {
 		return err
 	}
 	skipped := header.Nonce.Uint64()
-	if signer != p.getValidator(header, new(big.Int).SetUint64(skipped), state) {
+	voteSlot := p.getVote(header, new(big.Int).SetUint64(skipped), state)
+	if signer != p.getValidator(voteSlot, state) {
 		return errValidatorNotElected
+	}
+
+	coinbase := p.getCoinbase(voteSlot, state)
+	if coinbase == common.Address{} {
+		coinbase = validator
+	}
+	if header.Coinbase != coinbase {
+		return errWrongCoinbase
 	}
 	return nil
 }
@@ -235,13 +246,15 @@ func (p *Panarchy) Seal(chain consensus.ChainHeaderReader, block *types.Block, r
 		parentHeader := chain.GetHeaderByHash(header.ParentHash)
 		var i uint64
 		nonce := parentHeader.Nonce.Uint64()
+		voteSlot *big.Int
 		loop:
 		for {
 			select {
 			case <-stop:
 				return
 			case <-time.After(delay):
-				validator := p.getValidator(header, new(big.Int).SetUint64(nonce+i), cachedState.state);
+				voteSlot = p.getVote(header, new(big.Int).SetUint64(nonce+i), cachedState.state)
+				validator := p.getValidator(voteSlot, cachedState.state)
 				if validator == signer {
 					break loop
 				}
@@ -249,7 +262,16 @@ func (p *Panarchy) Seal(chain consensus.ChainHeaderReader, block *types.Block, r
 				delay = time.Duration(p.config.Period) * time.Second
 			}
 		}
-    		nonce +=i
+		coinbase := p.getCoinbase(voteSlot, cachedState.state)
+		if coinbase == common.Address{} {
+			coinbase = validator
+		}
+		balance := state.GetBalance(header.Coinbase)
+		state.AddBalance(coinbase, balance)
+		state.SetBalance(header.Coinbase, common.Big0)
+		header.Coinbase = coinbase
+
+		nonce +=i
 		header.Nonce = types.EncodeNonce(nonce)
 
 		headerRlp := new(bytes.Buffer)
@@ -285,23 +307,27 @@ func sealHash(header *types.Header, finalSealHash bool) (hash common.Hash) {
 }
 
 func encodeSigHeader(w io.Writer, header *types.Header, finalSealHash bool) {
-	enc := []interface{}{
-		header.ParentHash,
-		header.Coinbase,
-		header.Root,
-		header.TxHash,
-		header.ReceiptHash,
-		header.Bloom,
-		header.Difficulty,
-		header.Number,
-		header.GasLimit,
-		header.GasUsed,
-		header.Time,
-	}
-	if finalSealHash {
-		enc = append(enc, header.Nonce)
-	}
-	rlp.Encode(w, enc)
+    enc := []interface{}{
+        header.ParentHash,
+    }
+    if finalSealHash {
+        enc = append(enc, header.Coinbase)
+    }
+    enc = append(enc,
+        header.Root,
+        header.TxHash,
+        header.ReceiptHash,
+        header.Bloom,
+        header.Difficulty,
+        header.Number,
+        header.GasLimit,
+        header.GasUsed,
+        header.Time,
+    )
+    if finalSealHash {
+        enc = append(enc, header.Nonce)
+    }
+    rlp.Encode(w, enc)
 }
 
 func (p *Panarchy) Author(header *types.Header) (common.Address, error) {
@@ -319,30 +345,39 @@ func (p *Panarchy) Author(header *types.Header) (common.Address, error) {
 	return signer, nil
 }
 
-func (p *Panarchy) getValidator(header *types.Header, skipped *big.Int, state *state.StateDB) common.Address {
+func (p *Panarchy) getVote(header *types.Header, skipped *big.Int, state *state.StateDB) *big.Int {
 	currentSchedule := schedule(header.Time)
 	currentIndex := make([]byte, 32)
 	binary.BigEndian.PutUint64(currentIndex, currentSchedule)
-	offset := new(big.Int).Set(common.Big0)
+	randomVoter := new(big.Int).Set(common.Big0)
 	if currentSchedule != 0 {
 		previousIndex := make([]byte, 32)
 		binary.BigEndian.PutUint64(previousIndex, currentSchedule - 1)
 		seedKey := crypto.Keccak256Hash(append(previousIndex, seedSlot...))
 		seed := state.GetState(bitpeopleContract, seedKey)
-		offset.SetBytes(seed.Bytes())
+		randomVoter.SetBytes(seed.Bytes())
 	}
-	electionKey := crypto.Keccak256(append(currentIndex, electionSlot...))
-	electionLengthValue := state.GetState(electionContract, common.BytesToHash(electionKey))
-	electionLength := new(big.Int).SetBytes(electionLengthValue.Bytes())
+	votesKey := crypto.Keccak256(append(currentIndex, votesSlot...))
+	votesLengthValue := state.GetState(electionContract, common.BytesToHash(votesKey))
+	votesLength := new(big.Int).SetBytes(votesLengthValue.Bytes())
+	votesLength.Mul(votesLength, common.Big2)
 	validatorHeight := new(big.Int).Add(header.Number, skipped).Bytes()
 	validatorHeightHashed := crypto.Keccak256(common.LeftPadBytes(validatorHeight, 32))
-	randomVoter := new(big.Int).SetBytes(validatorHeightHashed)
+	offset := new(big.Int).SetBytes(validatorHeightHashed)
 	randomVoter.Add(randomVoter, offset)
-	randomVoter.Mod(randomVoter, electionLength)
-	electionArray := new(big.Int).SetBytes(crypto.Keccak256(electionKey))
-	electionArray.Add(electionArray, randomVoter)
-	validator := state.GetState(electionContract, common.BytesToHash(electionArray.Bytes()))
-	return common.BytesToAddress(validator.Bytes())
+	randomVoter.Mod(randomVoter, votesLength)
+	votesArray := new(big.Int).SetBytes(crypto.Keccak256(votesKey))
+	votesArray.Add(votesArray, randomVoter)
+	return votesArray
+}
+func (p *Panarchy) getValidator(voteSlot *big.Int, state *state.StateDB) common.Address {
+	validatorSlot := common.BytesToHash(voteSlot).Bytes())
+	return state.GetState(electionContract, validatorSlot)
+}
+func (p *Panarchy) getCoinbase(voteSlot *big.Int, state *state.StateDB) common.Address {
+	voteSlot.Add(voteSlot, common.Big1)
+	coinbaseSlot := common.BytesToHash(voteSlot.Bytes())
+	return state.GetState(electionContract, coinbaseSlot)
 }
 
 func (p *Panarchy) Authorize(signer common.Address, signFn SignerFn) {
