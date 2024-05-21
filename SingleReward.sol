@@ -22,10 +22,10 @@ contract Coinbase {
         uint validatorReward = balance - voterReward;
 
         (bool voterSuccess, ) = voter.call{value: voterReward}("");
-        require(voterSuccess, "Voter transfer failed.");
+        require(voterSuccess, "Voter transfer failed");
 
         (bool validatorSuccess, ) = validator.call{value: validatorReward}("");
-        require(validatorSuccess, "Validator transfer failed.");
+        require(validatorSuccess, "Validator transfer failed");
     }
 }
 
