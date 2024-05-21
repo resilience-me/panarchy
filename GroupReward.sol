@@ -13,14 +13,16 @@ interface Election {
 
 contract Coinbase {
     address public owner;
+    address public validator;
     mapping(address => uint) public votes;
     uint public totalVotes;
     uint public voterReward;
     uint public validatorReward;
     uint public voterShare;
 
-    constructor(address _owner, uint _voterShare) {
+    constructor(address _owner, address _validator, uint _voterShare) {
         owner = _owner;
+        validator = _validator;
         voterShare = _voterShare;
     }
 
@@ -50,7 +52,7 @@ contract Coinbase {
         require(success, "Transfer failed");
     }
 
-    function claimValidatorReward(address validator) external onlyOwner {
+    function claimValidatorReward() external onlyOwner {
         initRewards();
         uint _validatorReward = validatorReward;
         delete validatorReward;
