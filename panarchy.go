@@ -271,7 +271,7 @@ func (p *Panarchy) Seal(chain consensus.ChainHeaderReader, block *types.Block, r
 		}
 		balance := cachedState.state.GetBalance(header.Coinbase)
 		cachedState.state.AddBalance(coinbase, balance)
-		cachedState.state.SetBalance(header.Coinbase, common.Big0)
+		cachedState.state.SetBalance(header.Coinbase, new(big.Int).Set(common.Big0))
 		header.Coinbase = coinbase
 
 		nonce +=i
