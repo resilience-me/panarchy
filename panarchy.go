@@ -226,7 +226,6 @@ func (p *Panarchy) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header
 		return nil, errNoWithdrawalsAllowed
 	}
 	mutations.AccumulateRewards(chain.Config(), state, header, uncles)
-	header.Root = state.IntermediateRoot(true)
 	p.cachedState = cachedState {
 		state: state,
 		number: header.Number.Uint64(),
@@ -273,6 +272,7 @@ func (p *Panarchy) Seal(chain consensus.ChainHeaderReader, block *types.Block, r
 		cachedState.state.AddBalance(coinbase, balance)
 		cachedState.state.SetBalance(header.Coinbase, new(big.Int).Set(common.Big0))
 		header.Coinbase = coinbase
+		header.Root = state.IntermediateRoot(true)
 
 		nonce +=i
 		header.Nonce = types.EncodeNonce(nonce)
@@ -314,10 +314,11 @@ func encodeSigHeader(w io.Writer, header *types.Header, finalSealHash bool) {
         header.ParentHash,
     }
     if finalSealHash {
-        enc = append(enc, header.Coinbase)
+        enc = append(enc,
+	header.Coinbase, 
+        header.Root)
     }
     enc = append(enc,
-        header.Root,
         header.TxHash,
         header.ReceiptHash,
         header.Bloom,
