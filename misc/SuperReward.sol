@@ -14,11 +14,6 @@ contract SuperReward {
         validator = _validator;
     }
 
-    modifier onlyValidator() {
-        require(msg.sender == validator, "Only the validator can perform this action");
-        _;
-    }
-
     function vote() external {
         uint t = election.schedule() + 1;
         require(election.allowance(t, msg.sender, address(this)) >= 1, "Insufficient allowance to vote");
