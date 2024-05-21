@@ -6,24 +6,21 @@ interface Election {
     function votesLength(uint t) external view returns (uint);
 }
 
-contract Schedule {
-    uint constant public genesis = 1715407200;
-    uint constant public period = 4 weeks;
-    function schedule() public view returns(uint) { return ((block.timestamp - genesis) / period); }
-}
-
-contract ElectedEvent is Schedule {
+contract ElectedEvent {
 
     Bitpeople bitpeople = Bitpeople(0x0000000000000000000000000000000000000010);
     Election election = Election(0x0000000000000000000000000000000000000011);
-    
+
+    uint constant public genesisBlockTime = 1715407200;
+    uint constant public period = 4 weeks;
+
     uint constant public slotTime = 12;
     uint public nonce;
 
     event Elected(uint indexed slot, address indexed validator, address indexed coinbase);
 
     function emitElectedEvent() external returns (bool) {
-        uint256 slot = (block.timestamp - genesis) / slotTime;
+        uint256 slot = (block.timestamp - genesisBlockTime) / slotTime;
         if(slot <= nonce) return false;
         uint t = nonce * slotTime / period;
         uint i = (bitpeople.seed(t) + uint256(keccak256(abi.encode(nonce)))) % election.votesLength(t);
