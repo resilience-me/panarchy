@@ -172,7 +172,6 @@ func (p *Panarchy) processCheckpoint(timestamp uint64) error {
 }
 
 func (p *Panarchy) Prepare(chain consensus.ChainHeaderReader, header *types.Header) error {
-
 	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
 	if parent == nil {
 		return consensus.ErrUnknownAncestor
@@ -190,19 +189,19 @@ func (p *Panarchy) Prepare(chain consensus.ChainHeaderReader, header *types.Head
 }
 
 func (p *Panarchy) Finalize(chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, withdrawals []*types.Withdrawal) {
-	if err := p.verifySealAndCoinbase(chain, header, state); err != nil {
+	parentHeader := chain.GetHeaderByHash(header.ParentHash)
+	if err := p.verifySealAndCoinbase(header, parentHeader, state); err != nil {
 		header.GasUsed=0
 		log.Error("Error in Finalize. Will now force ValidateState to fail by altering block.Header.GasUsed")
 	}
 	mutations.AccumulateRewards(chain.Config(), state, header, uncles)
 }
 
-func (p *Panarchy) verifySealAndCoinbase(chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB) error {
+func (p *Panarchy) verifySealAndCoinbase(header *types.Header, parentHeader *types.Header, state *state.StateDB) error {
 	signer, err := p.Author(header)
 	if err != nil {
 		return err
 	}
-	parentHeader := chain.GetHeaderByHash(header.ParentHash)
 
 	totalSkipped := header.Nonce.Uint64()
 	skipped := totalSkipped - parentHeader.Nonce.Uint64()
