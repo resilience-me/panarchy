@@ -249,7 +249,7 @@ func (p *Panarchy) Seal(chain consensus.ChainHeaderReader, block *types.Block, r
 		parentHeader := chain.GetHeaderByHash(header.ParentHash)
 		var i uint64
 		nonce := parentHeader.Nonce.Uint64()
-		voteSlot *big.Int
+		var voteSlot *big.Int
 		loop:
 		for {
 			select {
