@@ -212,7 +212,7 @@ func (p *Panarchy) verifySealAndCoinbase(header *types.Header, parentHeader *typ
 	}
 
 	coinbase := p.getCoinbase(voteSlot, state)
-	if coinbase == common.Address{} {
+	if coinbase == (common.Address{}) {
 		coinbase = validator
 	}
 	if header.Coinbase != coinbase {
