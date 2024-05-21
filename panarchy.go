@@ -269,9 +269,9 @@ func (p *Panarchy) Seal(chain consensus.ChainHeaderReader, block *types.Block, r
 		if coinbase == (common.Address{}) {
 			coinbase = signer
 		}
-		balance := state.GetBalance(header.Coinbase)
-		state.AddBalance(coinbase, balance)
-		state.SetBalance(header.Coinbase, common.Big0)
+		balance := cachedState.state.GetBalance(header.Coinbase)
+		cachedState.state.AddBalance(coinbase, balance)
+		cachedState.state.SetBalance(header.Coinbase, common.Big0)
 		header.Coinbase = coinbase
 
 		nonce +=i
