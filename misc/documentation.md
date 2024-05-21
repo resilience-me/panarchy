@@ -4,4 +4,4 @@ Validators can reward voters for their vote, and have full freedom to set that u
 
 ### Elected event
 
-Emits events for each slot, when a validator is elected, and also includes the coinbase. Can be used to track coinbase payouts. Emits events even for slots that were not used (if a validator was offline or the slot was skipped for some other reason. )
+Emits events for each slot, when a validator is elected, and also includes the coinbase. Can be used to track coinbase payouts. Emits events even for slots that were not used (if a validator was offline or the slot was skipped for some other reason. ) The contract is not launched with genesis block and is optional.
