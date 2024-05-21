@@ -47,7 +47,7 @@ contract Coinbase {
         uint reward = (voterReward * votes[voter]) / totalVotes;
         delete votes[voter];
         (bool success, ) = voter.call{value: reward}("");
-        require(success, "Transfer failed.");
+        require(success, "Transfer failed");
     }
 
     function claimValidatorReward(address validator) external onlyOwner {
@@ -55,7 +55,7 @@ contract Coinbase {
         uint _validatorReward = validatorReward;
         delete validatorReward;
         (bool success, ) = validator.call{value: _validatorReward}("");
-        require(success, "Validator transfer failed.");
+        require(success, "Validator transfer failed");
     }
 }
 
