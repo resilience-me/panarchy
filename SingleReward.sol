@@ -42,7 +42,8 @@ contract SingleReward {
     address public validator;
     uint public voterShare;
 
-    mapping(address => Coinbase) public coinbase;
+    mapping(uint => mapping(address => Coinbase)) public coinbase;
+    mapping(uint => address[]) public voters;
 
     constructor(address _validator, uint _voterShare) {
         validator = _validator;
@@ -54,19 +55,26 @@ contract SingleReward {
         _;
     }
 
-    function vote(address voter) external {
-        uint t = election.schedule();
-        if (address(coinbase[voter]) == address(0)) {
-            coinbase[voter] = new Coinbase(address(this), voter, validator, voterShare);
+    function vote() external {
+        uint t = election.schedule() + 1;
+        if (address(coinbase[t][msg.sender]) == address(0)) {
+            coinbase[t][voter] = new Coinbase(address(this), msg.sender, validator, voterShare);
+            voters[t].push(msg.sender);
         }
-        require(election.allowance(t, voter, address(this)) >= 1, "Insufficient allowance to vote");
-        election.transferFrom(voter, address(this), 1);
-        election.vote(validator, address(coinbase[voter]));
+        require(election.allowance(t, msg.sender, address(this)) >= 1, "Insufficient allowance to vote");
+        election.transferFrom(msg.sender, address(this), 1);
+        election.vote(validator, address(coinbase[t][msg.sender]));
     }
 
-    function claimReward() external {
-        Coinbase _coinbase = coinbase[msg.sender];
+    function _claimReward(uint t, address voter) external {
+        Coinbase _coinbase = coinbase[t][voter];
         require(address(_coinbase) != address(0), "Coinbase not set for this voter");
         _coinbase.claimReward();
+    }
+    function claimReward(uint t) external {
+        _claimReward(t, msg.sender);
+    }
+    function claimValidatorRewards(uint t, address voter) external onlyValidator {
+        _claimReward(t, voter);
     }
 }
