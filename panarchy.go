@@ -190,20 +190,24 @@ func (p *Panarchy) Prepare(chain consensus.ChainHeaderReader, header *types.Head
 }
 
 func (p *Panarchy) Finalize(chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, withdrawals []*types.Withdrawal) {
-	if err := p.verifySealAndCoinbase(header, state); err != nil {
+	if err := p.verifySealAndCoinbase(chain, header, state); err != nil {
 		header.GasUsed=0
 		log.Error("Error in Finalize. Will now force ValidateState to fail by altering block.Header.GasUsed")
 	}
 	mutations.AccumulateRewards(chain.Config(), state, header, uncles)
 }
 
-func (p *Panarchy) verifySealAndCoinbase(header *types.Header, state *state.StateDB) error {
+func (p *Panarchy) verifySealAndCoinbase(chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB) error {
 	signer, err := p.Author(header)
 	if err != nil {
 		return err
 	}
-	skipped := header.Nonce.Uint64()
-	voteSlot := p.getVote(header, new(big.Int).SetUint64(skipped), state)
+	parentHeader := chain.GetHeaderByHash(header.ParentHash)
+
+	totalSkipped := header.Nonce.Uint64()
+	skipped := totalSkipped - parentHeader.Nonce.Uint64()
+	
+	voteSlot := p.getVote(header.Time + skipped*p.config.Period, header.Number, new(big.Int).SetUint64(totalSkipped), state)
 	if signer != p.getValidator(voteSlot, state) {
 		return errValidatorNotElected
 	}
@@ -253,7 +257,7 @@ func (p *Panarchy) Seal(chain consensus.ChainHeaderReader, block *types.Block, r
 			case <-stop:
 				return
 			case <-time.After(delay):
-				voteSlot = p.getVote(header, new(big.Int).SetUint64(nonce+i), cachedState.state)
+				voteSlot = p.getVote(header.Time + i*p.config.Period, header.Number, new(big.Int).SetUint64(nonce+i), cachedState.state)
 				validator := p.getValidator(voteSlot, cachedState.state)
 				if validator == signer {
 					break loop
@@ -345,8 +349,8 @@ func (p *Panarchy) Author(header *types.Header) (common.Address, error) {
 	return signer, nil
 }
 
-func (p *Panarchy) getVote(header *types.Header, skipped *big.Int, state *state.StateDB) *big.Int {
-	currentSchedule := schedule(header.Time)
+func (p *Panarchy) getVote(timestamp uint64, blockNumber *big.Int, totalSkipped *big.Int, state *state.StateDB) *big.Int {
+	currentSchedule := schedule(timestamp)
 	currentIndex := make([]byte, 32)
 	binary.BigEndian.PutUint64(currentIndex, currentSchedule)
 	randomVoter := new(big.Int).Set(common.Big0)
@@ -361,7 +365,7 @@ func (p *Panarchy) getVote(header *types.Header, skipped *big.Int, state *state.
 	votesLengthValue := state.GetState(electionContract, common.BytesToHash(votesKey))
 	votesLength := new(big.Int).SetBytes(votesLengthValue.Bytes())
 	votesLength.Mul(votesLength, common.Big2)
-	validatorHeight := new(big.Int).Add(header.Number, skipped).Bytes()
+	validatorHeight := new(big.Int).Add(blockNumber, totalSkipped).Bytes()
 	validatorHeightHashed := crypto.Keccak256(common.LeftPadBytes(validatorHeight, 32))
 	offset := new(big.Int).SetBytes(validatorHeightHashed)
 	randomVoter.Add(randomVoter, offset)
