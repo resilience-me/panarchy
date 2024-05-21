@@ -50,7 +50,7 @@ contract PAN is Schedule, Exp {
 
     function withdrawUBI() external {
         uint t = schedule();
-        require(bitpeople.proofOfUniqueHuman(t, msg.sender), "Failed to verify proof-of-unique-human.");
+        require(bitpeople.proofOfUniqueHuman(t, msg.sender), "Failed to verify proof-of-unique-human");
         require(!claimedUBI[t][msg.sender], "UBI already claimed for this period");
         taxation(msg.sender);
         uint seconds_into_period = block.timestamp - toSeconds(t);
