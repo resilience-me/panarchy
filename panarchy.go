@@ -206,12 +206,12 @@ func (p *Panarchy) verifySealAndCoinbase(header *types.Header, parentHeader *typ
 	totalSkipped := header.Nonce.Uint64()
 	skipped := totalSkipped - parentHeader.Nonce.Uint64()
 	
-	voteSlot := p.getVote(header.Time + skipped*p.config.Period, header.Number, new(big.Int).SetUint64(totalSkipped), state)
-	if signer != p.getValidator(voteSlot, state) {
+	elected := p.getVote(header.Time + skipped*p.config.Period, header.Number, new(big.Int).SetUint64(totalSkipped), state)
+	if signer != p.getValidator(elected, state) {
 		return errValidatorNotElected
 	}
 
-	coinbase := p.getCoinbase(voteSlot, state)
+	coinbase := p.getCoinbase(elected, state)
 	if coinbase == (common.Address{}) {
 		coinbase = signer
 	}
@@ -249,15 +249,15 @@ func (p *Panarchy) Seal(chain consensus.ChainHeaderReader, block *types.Block, r
 		parentHeader := chain.GetHeaderByHash(header.ParentHash)
 		var i uint64
 		nonce := parentHeader.Nonce.Uint64()
-		var voteSlot *big.Int
+		var elected *big.Int
 		loop:
 		for {
 			select {
 			case <-stop:
 				return
 			case <-time.After(delay):
-				voteSlot = p.getVote(header.Time + i*p.config.Period, header.Number, new(big.Int).SetUint64(nonce+i), cachedState.state)
-				validator := p.getValidator(voteSlot, cachedState.state)
+				elected = p.getVote(header.Time + i*p.config.Period, header.Number, new(big.Int).SetUint64(nonce+i), cachedState.state)
+				validator := p.getValidator(elected, cachedState.state)
 				if validator == signer {
 					break loop
 				}
@@ -265,7 +265,7 @@ func (p *Panarchy) Seal(chain consensus.ChainHeaderReader, block *types.Block, r
 				delay = time.Duration(p.config.Period) * time.Second
 			}
 		}
-		coinbase := p.getCoinbase(voteSlot, cachedState.state)
+		coinbase := p.getCoinbase(elected, cachedState.state)
 		if coinbase == (common.Address{}) {
 			coinbase = signer
 		}
@@ -363,24 +363,24 @@ func (p *Panarchy) getVote(timestamp uint64, blockNumber *big.Int, totalSkipped 
 	votesKey := crypto.Keccak256(append(currentIndex, votesSlot...))
 	votesLengthValue := state.GetState(electionContract, common.BytesToHash(votesKey))
 	votesLength := new(big.Int).SetBytes(votesLengthValue.Bytes())
-	votesLength.Mul(votesLength, common.Big2)
 	validatorHeight := new(big.Int).Add(blockNumber, totalSkipped).Bytes()
 	validatorHeightHashed := crypto.Keccak256(common.LeftPadBytes(validatorHeight, 32))
 	offset := new(big.Int).SetBytes(validatorHeightHashed)
 	randomVoter := new(big.Int).Add(seed, offset)
 	randomVoter.Mod(randomVoter, votesLength)
+	randomVoter.Mul(randomVoter, common.Big2)
 	votesArray := new(big.Int).SetBytes(crypto.Keccak256(votesKey))
 	votesArray.Add(votesArray, randomVoter)
 	return votesArray
 }
-func (p *Panarchy) getValidator(voteSlot *big.Int, state *state.StateDB) common.Address {
-	validatorSlot := common.BytesToHash(voteSlot.Bytes())
+func (p *Panarchy) getValidator(elected *big.Int, state *state.StateDB) common.Address {
+	validatorSlot := common.BytesToHash(elected.Bytes())
 	validator := state.GetState(electionContract, validatorSlot)
 	return common.BytesToAddress(validator.Bytes())
 }
-func (p *Panarchy) getCoinbase(voteSlot *big.Int, state *state.StateDB) common.Address {
-	voteSlot.Add(voteSlot, common.Big1)
-	coinbaseSlot := common.BytesToHash(voteSlot.Bytes())
+func (p *Panarchy) getCoinbase(elected *big.Int, state *state.StateDB) common.Address {
+	elected.Add(elected, common.Big1)
+	coinbaseSlot := common.BytesToHash(elected.Bytes())
 	coinbase := state.GetState(electionContract, coinbaseSlot)
 	return common.BytesToAddress(coinbase.Bytes())
 }
