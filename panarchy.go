@@ -36,7 +36,7 @@ var (
 	errFailedStatePassToSeal    	= errors.New("Failed to pass state object to Seal. Go-Ethereum consensus engine interface is not perfect fit for Panarchy engine, so we provide the state object to Seal in an unconventional way. We add this error check if it were to fail for some reason.")
 	errHeaderOlderThanCheckpoint 	= errors.New("Header is older than checkpoint and will therefore be rejected")
 	errValidatorNotElected      	= errors.New("Validator is not elected to sign the block")
-	errWrongCoinbase	      	= errors.New("Coinbase is not the one registered in Election contract")
+	errWrongCoinbase	      	= errors.New("Coinbase is not the Election contract")
 )
 
 const (
@@ -188,36 +188,41 @@ func (p *Panarchy) Prepare(chain consensus.ChainHeaderReader, header *types.Head
 	return nil
 }
 
+func (p *Panarchy) finalizeCoinbase(header *types.Header, elected *big.Int, address validator, state *state.StateDB) {
+	coinbase := p.getCoinbase(elected, state)
+	if coinbase == (common.Address{}) {
+		coinbase = validator
+	}
+	balance := state.GetBalance(header.Coinbase)
+	state.AddBalance(coinbase, balance)
+	state.SetBalance(header.Coinbase, new(big.Int).Set(common.Big0))
+}
+
 func (p *Panarchy) Finalize(chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, withdrawals []*types.Withdrawal) {
-	parentHeader := chain.GetHeaderByHash(header.ParentHash)
-	if err := p.verifySealAndCoinbase(header, parentHeader, state); err != nil {
+	if err := p.finalize(chain, header, uncles, state); err != nil {
 		header.GasUsed=0
 		log.Error("Error in Finalize. Will now force ValidateState to fail by altering block.Header.GasUsed")
 	}
-	mutations.AccumulateRewards(chain.Config(), state, header, uncles)
 }
-
-func (p *Panarchy) verifySealAndCoinbase(header *types.Header, parentHeader *types.Header, state *state.StateDB) error {
+func (p *Panarchy) finalize(chain consensus.ChainHeaderReader, header *types.Header, uncles []*types.Header, state *state.StateDB) error {
 	signer, err := p.Author(header)
 	if err != nil {
 		return err
 	}
+	parentHeader := chain.GetHeaderByHash(header.ParentHash)
 
 	totalSkipped := header.Nonce.Uint64()
 	skipped := totalSkipped - parentHeader.Nonce.Uint64()
-	
+
 	elected := p.getVote(header.Time + skipped*p.config.Period, header.Number, new(big.Int).SetUint64(totalSkipped), state)
 	if signer != p.getValidator(elected, state) {
 		return errValidatorNotElected
 	}
-
-	coinbase := p.getCoinbase(elected, state)
-	if coinbase == (common.Address{}) {
-		coinbase = signer
-	}
-	if header.Coinbase != coinbase {
+	mutations.AccumulateRewards(chain.Config(), state, header, uncles)
+	if header.Coinbase != electionContract {
 		return errWrongCoinbase
 	}
+	finalizeCoinbase(header, elected, signer, state)
 	return nil
 }
 
@@ -264,14 +269,7 @@ func (p *Panarchy) Seal(chain consensus.ChainHeaderReader, block *types.Block, r
 				delay = time.Duration(p.config.Period) * time.Second
 			}
 		}
-		coinbase := p.getCoinbase(elected, cachedState.state)
-		if coinbase == (common.Address{}) {
-			coinbase = signer
-		}
-		balance := cachedState.state.GetBalance(header.Coinbase)
-		cachedState.state.AddBalance(coinbase, balance)
-		cachedState.state.SetBalance(header.Coinbase, new(big.Int).Set(common.Big0))
-		header.Coinbase = coinbase
+		finalizeCoinbase(header, elected, signer, cachedState)
 		header.Root = state.IntermediateRoot(true)
 
 		nonce +=i
