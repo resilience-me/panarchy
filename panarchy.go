@@ -348,7 +348,7 @@ func encodeSigHeader(w io.Writer, header *types.Header, finalSealHash bool) {
         header.GasLimit,
         header.GasUsed,
         header.Time,
-    )
+    }
     if finalSealHash {
         enc = append(enc, header.Nonce)
     }
