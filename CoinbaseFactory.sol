@@ -9,9 +9,9 @@ interface Election {
 }
 
 contract Coinbase {
-    address constant internal blockRewardsContract = 0x0000000000000000000000000000000000000012;
+    address constant internal coinbaseFactoryContract = 0x0000000000000000000000000000000000000012;
     function sendAll(address rewardAddress) external {
-        require(msg.sender == blockRewardsContract);
+        require(msg.sender == coinbaseFactoryContract);
         selfdestruct(rewardAddress);
     }
 }
