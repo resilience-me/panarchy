@@ -368,7 +368,7 @@ func (p *Panarchy) Author(header *types.Header) (common.Address, error) {
 	return signer, nil
 }
 
-func (p *Panarchy) getValidator(timestamp uint64, slot []byte, state *state.StateDB) *big.Int {
+func (p *Panarchy) getValidator(timestamp uint64, slot []byte, state *state.StateDB) common.Address {
 	currentSchedule := schedule(timestamp)
 	currentIndex := make([]byte, 32)
 	binary.BigEndian.PutUint64(currentIndex, currentSchedule)
