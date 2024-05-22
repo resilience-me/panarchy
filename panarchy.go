@@ -36,7 +36,6 @@ var (
 	errFailedStatePassToSeal    	= errors.New("Failed to pass state object to Seal. Go-Ethereum consensus engine interface is not perfect fit for Panarchy engine, so we provide the state object to Seal in an unconventional way. We add this error check if it were to fail for some reason.")
 	errHeaderOlderThanCheckpoint 	= errors.New("Header is older than checkpoint and will therefore be rejected")
 	errValidatorNotElected      	= errors.New("Validator is not elected to sign the block")
-	errWrongCoinbase	      	= errors.New("Coinbase is not the Election contract")
 )
 
 const (
