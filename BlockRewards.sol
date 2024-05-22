@@ -31,7 +31,7 @@ contract CoinbaseFactory is Schedule {
 
     uint public nonce;
 
-    event Elected(uint indexed slot, address indexed validator, address indexed coinbase);
+    event CoinbaseEvent(uint indexed slot, address indexed validator, address indexed coinbase);
 
     function createCoinbaseContract() external returns (bool) {
         uint256 slot = (block.timestamp - genesisBlockTimestamp) / slotTime;
@@ -50,7 +50,7 @@ contract CoinbaseFactory is Schedule {
         } else {
             coinbase.sendAll(vote.coinbase);
         }
-        emit Elected(slot, vote.validator, vote.coinbase);
+        emit CoinbaseEvent(slot, vote.validator, vote.coinbase);
         return true;
     }
 }
