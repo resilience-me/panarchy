@@ -40,7 +40,7 @@ contract CoinbaseFactory {
         uint i = (bitpeople.seed(t) + uint256(keccak256(abi.encode(nonce)))) % election.votesLength(t);
         Election.Vote memory vote = election.votes(t, i);
         if(vote.coinbase == address(0)) {
-          coinbase.sendAll(vote.validator);
+            coinbase.sendAll(vote.validator);
         } else {
             coinbase.sendAll(vote.coinbase);
         }
