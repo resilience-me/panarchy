@@ -283,7 +283,7 @@ func (p *Panarchy) Seal(chain consensus.ChainHeaderReader, block *types.Block, r
 		p.finalizeCoinbase(chain, header, elected, signer, block.Transactions(), cachedState.state)
 		stateRoot := cachedState.state.IntermediateRoot(chain.Config().IsEnabled(chain.Config().GetEIP161dTransition, header.Number))
 
-	        time.Sleep(5 * time.Second)
+	        time.Sleep(10 * time.Second)
 
 		header.Root = stateRoot
 
