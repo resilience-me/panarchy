@@ -193,8 +193,9 @@ func getSlot(blockNumber *big.Int, totalSkipped uint64) []byte {
 	return common.LeftPadBytes(validatorHeight, 32)
 }
 
-func finalizePreviousCoinbase(slot []byte, state *state.StateDB) {
-	coinbase := crypto.CreateAddress(coinbaseFactoryContract, slot)
+func finalizePreviousCoinbase(parentHeader *types.Header, state *state.StateDB) {
+	parentSlot := getSlot(parentHeader.Number, parentHeader.Nonce.Uint64())
+	coinbase := crypto.CreateAddress(coinbaseFactoryContract, parentSlot)
 	balance := state.GetBalance(electionContract)
 	state.SetBalance(electionContract, big.NewInt(0))
 	state.AddBalance(coinbase, balance)
@@ -224,6 +225,8 @@ func temporaryCoinbase(chain consensus.ChainHeaderReader, header *types.Header, 
 }
 
 func (p *Panarchy) Finalize(chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, withdrawals []*types.Withdrawal) {
+	parentHeader := chain.GetHeaderByHash(header.ParentHash)
+	finalizePreviousCoinbase(parentHeader, state)
 	temporaryCoinbase(chain, header, txs, state)
 	if err := p.verifySeal(chain, header, txs, state); err != nil {
 		header.GasUsed=0
@@ -253,8 +256,7 @@ func (p *Panarchy) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header
 	}
 
 	parentHeader := chain.GetHeaderByHash(header.ParentHash)
-	parentSlot := getSlot(parentHeader.Number, parentHeader.Nonce.Uint64())
-	finalizePreviousCoinbase(parentSlot, state)
+	finalizePreviousCoinbase(parentHeader, state)
 	
 	temporaryCoinbase(chain, header, txs, state)
 	header.Root = state.IntermediateRoot(chain.Config().IsEnabled(chain.Config().GetEIP161dTransition, header.Number))
@@ -288,8 +290,7 @@ func (p *Panarchy) Seal(chain consensus.ChainHeaderReader, block *types.Block, r
 			case <-stop:
 				return
 			case <-time.After(delay):
-				slot := getSlot(header.Number, nonce+i)
-				validator := p.getValidator(header.Time + i*p.config.Period, slot, cachedState.state)
+				validator := p.getValidator(header.Time + i*p.config.Period, header.Number, nonce+i, cachedState.state)
 				if validator == signer {
 					break loop
 				}
@@ -369,7 +370,7 @@ func (p *Panarchy) Author(header *types.Header) (common.Address, error) {
 	return signer, nil
 }
 
-func (p *Panarchy) getValidator(timestamp uint64, slot []byte, state *state.StateDB) common.Address {
+func (p *Panarchy) getValidator(timestamp uint64, blockNumber *big.Int, totalSkipped uint64, state *state.StateDB) common.Address {
 	currentSchedule := schedule(timestamp)
 	currentIndex := make([]byte, 32)
 	binary.BigEndian.PutUint64(currentIndex, currentSchedule)
@@ -384,7 +385,8 @@ func (p *Panarchy) getValidator(timestamp uint64, slot []byte, state *state.Stat
 	votesKey := crypto.Keccak256(append(currentIndex, votesSlot...))
 	votesLengthValue := state.GetState(electionContract, common.BytesToHash(votesKey))
 	votesLength := new(big.Int).SetBytes(votesLengthValue.Bytes())
-	validatorHeightHashed := crypto.Keccak256(slot)
+	validatorHeight := getSlot(blockNumber, totalSkipped)
+	validatorHeightHashed := crypto.Keccak256(validatorHeight)
 	offset := new(big.Int).SetBytes(validatorHeightHashed)
 	randomVoter := new(big.Int).Add(seed, offset)
 	randomVoter.Mod(randomVoter, votesLength)
