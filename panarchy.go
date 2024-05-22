@@ -188,7 +188,7 @@ func (p *Panarchy) Prepare(chain consensus.ChainHeaderReader, header *types.Head
 }
 
 func getSlot(blockNumber *big.Int, totalSkipped uint64) []byte {
-	totalSkippedBigInt := new(big.Int).SetUint64(totalSkipped))
+	totalSkippedBigInt := new(big.Int).SetUint64(totalSkipped)
 	validatorHeight := new(big.Int).Add(blockNumber, totalSkippedBigInt).Bytes()
 	return common.LeftPadBytes(validatorHeight, 32)
 }
