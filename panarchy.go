@@ -206,16 +206,12 @@ func getTotalFees(txs []*types.Transaction) *big.Int {
 	return totalFees
 }
 
-func accumulateRewards(chain consensus.ChainHeaderReader, header *types.Header, coinbase common.Address, state *state.StateDB) {
-	minerReward, _ := mutations.GetRewards(chain.Config(), header, nil)
-	state.AddBalance(coinbase, minerReward)
-}
-
 func temporaryCoinbase(chain consensus.ChainHeaderReader, header *types.Header, txs []*types.Transaction, state *state.StateDB) {
 	totalFees := getTotalFees(txs)
 	state.SubBalance(header.Coinbase, totalFees)
 	state.AddBalance(electionContract, totalFees)
-	accumulateRewards(chain, header, electionContract, state)
+	minerReward, _ := mutations.GetRewards(chain.Config(), header, nil)
+	state.AddBalance(electionContract, minerReward)
 }
 
 func (p *Panarchy) Finalize(chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, withdrawals []*types.Withdrawal) {
