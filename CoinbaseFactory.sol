@@ -16,14 +16,7 @@ contract Coinbase {
     }
 }
 
-contract Schedule {
-
-    uint constant public genesis = 1715407200;
-
-    function schedule() public view returns(uint) { return ((block.timestamp - genesis) / period); }
-}
-
-contract CoinbaseFactory is Schedule {
+contract CoinbaseFactory {
 
     uint public genesisBlockTimestamp;
     uint constant public period = 4 weeks;
