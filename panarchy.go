@@ -254,9 +254,11 @@ func (p *Panarchy) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header
 		state: state,
 		number: header.Number.Uint64(),
 	}
-	slot := currentSlot(header.Number, new(big.Int).SetUint64(header.Nonce.Uint64()))
 
-	finalizePreviousCoinbase(slot, state)
+	parentHeader := chain.GetHeaderByHash(header.ParentHash)
+	parentSlot := getSlot(parentHeader.Number, new(big.Int).SetUint64(parentHeader.Nonce.Uint64()))
+	finalizePreviousCoinbase(parentSlot, state)
+	
 	temporaryCoinbase(chain, header, txs, state)
 	header.Root = state.IntermediateRoot(chain.Config().IsEnabled(chain.Config().GetEIP161dTransition, header.Number))
 
