@@ -281,16 +281,18 @@ func (p *Panarchy) Seal(chain consensus.ChainHeaderReader, block *types.Block, r
 		}
 
 		p.finalizeCoinbase(chain, header, elected, signer, block.Transactions(), cachedState.state)
-		header.Root = cachedState.state.IntermediateRoot(chain.Config().IsEnabled(chain.Config().GetEIP161dTransition, header.Number))
+		stateRoot := cachedState.state.IntermediateRoot(chain.Config().IsEnabled(chain.Config().GetEIP161dTransition, header.Number))
 
 	        for {
-			if _, err := cachedState.state.Database().Get(header.Root.Bytes()); err == nil {
+			if _, err := cachedState.state.Database().Get(stateRoot.Bytes()); err == nil {
 				break
 			}
-			log.Info("Waiting for state root to be fully registered", "root", root)
+			log.Info("Waiting for state root to be fully registered", "root", stateRoot)
 			time.Sleep(100 * time.Millisecond)
 	        }
 		
+		header.Root = stateRoot
+
 		nonce +=i
 		header.Nonce = types.EncodeNonce(nonce)
 
