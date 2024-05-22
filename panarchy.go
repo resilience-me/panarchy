@@ -184,18 +184,34 @@ func (p *Panarchy) Prepare(chain consensus.ChainHeaderReader, header *types.Head
 	}
 	p.updateCheckpoint(header.Time)
 	header.Difficulty = p.CalcDifficulty(chain, header.Time, parent)
-	header.Coinbase = electionContract
 	return nil
 }
 
-func (p *Panarchy) finalizeCoinbase(header *types.Header, elected *big.Int, address validator, state *state.StateDB) {
+func getTotalFees(txs []*types.Transaction) *big.Int {
+	var totalFees = big.NewInt(0)
+	for _, tx := range txs {
+		gasPrice := tx.GasPrice()
+		gasUsed := new(big.Int).SetUint64(tx.Gas())
+		txFee := new(big.Int).Mul(gasPrice, gasUsed)
+		totalFees.Add(totalFees, txFee)
+	}
+	return totalFees
+}
+
+func accumulateRewards(chain consensus.ChainHeaderReader, header *types.Header, coinbase address, state *state.StateDB) {
+	minerReward, _ := GetRewards(chain.Config(), header, nil)
+	state.AddBalance(coinbase, minerReward)
+}
+
+func (p *Panarchy) finalizeCoinbase(chain consensus.ChainHeaderReader, header *types.Header, elected *big.Int, address validator, txs []*types.Transaction, state *state.StateDB) {
 	coinbase := p.getCoinbase(elected, state)
 	if coinbase == (common.Address{}) {
 		coinbase = validator
 	}
-	balance := state.GetBalance(header.Coinbase)
-	state.AddBalance(coinbase, balance)
-	state.SetBalance(header.Coinbase, new(big.Int).Set(common.Big0))
+	totalFees := getTotalFees(txs)
+	state.SubBalance(header.Coinbase, totalFees)
+	state.AddBalance(coinbase, totalFees)
+	accumulateRewards(chain, header, coinbase, state)
 }
 
 func (p *Panarchy) Finalize(chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, withdrawals []*types.Withdrawal) {
@@ -204,7 +220,7 @@ func (p *Panarchy) Finalize(chain consensus.ChainHeaderReader, header *types.Hea
 		log.Error("Error in Finalize. Will now force ValidateState to fail by altering block.Header.GasUsed")
 	}
 }
-func (p *Panarchy) finalize(chain consensus.ChainHeaderReader, header *types.Header, uncles []*types.Header, state *state.StateDB) error {
+func (p *Panarchy) finalize(chain consensus.ChainHeaderReader, header *types.Header, txs []*types.Transaction, state *state.StateDB) error {
 	signer, err := p.Author(header)
 	if err != nil {
 		return err
@@ -218,11 +234,7 @@ func (p *Panarchy) finalize(chain consensus.ChainHeaderReader, header *types.Hea
 	if signer != p.getValidator(elected, state) {
 		return errValidatorNotElected
 	}
-	mutations.AccumulateRewards(chain.Config(), state, header, uncles)
-	if header.Coinbase != electionContract {
-		return errWrongCoinbase
-	}
-	finalizeCoinbase(header, elected, signer, state)
+	finalizeCoinbase(chain, header, elected, signer, txs, state)
 	return nil
 }
 
@@ -230,7 +242,6 @@ func (p *Panarchy) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header
 	if len(withdrawals) > 0 {
 		return nil, errNoWithdrawalsAllowed
 	}
-	mutations.AccumulateRewards(chain.Config(), state, header, uncles)
 	p.cachedState = cachedState {
 		state: state,
 		number: header.Number.Uint64(),
@@ -269,7 +280,8 @@ func (p *Panarchy) Seal(chain consensus.ChainHeaderReader, block *types.Block, r
 				delay = time.Duration(p.config.Period) * time.Second
 			}
 		}
-		finalizeCoinbase(header, elected, signer, cachedState.state)
+
+		finalizeCoinbase(chain, header, elected, signer, block.transactions, cachedState.state)
 		header.Root = cachedState.state.IntermediateRoot(chain.Config().IsEnabled(chain.Config().GetEIP161dTransition, header.Number))
 
 		nonce +=i
