@@ -321,11 +321,10 @@ func sealHash(header *types.Header, finalSealHash bool) (hash common.Hash) {
 func encodeSigHeader(w io.Writer, header *types.Header, finalSealHash bool) {
     enc := []interface{}{
         header.ParentHash,
+	header.Coinbase
     }
     if finalSealHash {
-        enc = append(enc,
-	header.Coinbase, 
-        header.Root)
+        enc = append(enc, header.Root)
     }
     enc = append(enc,
         header.TxHash,
