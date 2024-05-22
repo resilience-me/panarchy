@@ -29,7 +29,7 @@ contract CoinbaseFactory {
 
     function createCoinbaseContract() public returns (bool) {
         uint256 slot = (block.timestamp - genesisBlockTimestamp) / slotTime;
-        if(slot <= nonce) return false;
+        if(slot <= nonce+1) return false;
         Coinbase coinbase = new Coinbase();
         nonce++;
         if(address(coinbase).balance == 0) {
