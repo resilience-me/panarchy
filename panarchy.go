@@ -187,8 +187,9 @@ func (p *Panarchy) Prepare(chain consensus.ChainHeaderReader, header *types.Head
 	return nil
 }
 
-func currentSlot(blockNumber *big.Int, totalSkipped *big.Int) []byte {
-	validatorHeight := new(big.Int).Add(blockNumber, totalSkipped).Bytes()
+func getSlot(blockNumber *big.Int, totalSkipped uint64) []byte {
+	totalSkippedBigInt := new(big.Int).SetUint64(totalSkipped))
+	validatorHeight := new(big.Int).Add(blockNumber, totalSkippedBigInt).Bytes()
 	return common.LeftPadBytes(validatorHeight, 32)
 }
 
@@ -238,7 +239,7 @@ func (p *Panarchy) verifySeal(chain consensus.ChainHeaderReader, header *types.H
 
 	totalSkipped := header.Nonce.Uint64()
 	skipped := totalSkipped - parentHeader.Nonce.Uint64()
-	slot := currentSlot(header.Number, new(big.Int).SetUint64(totalSkipped))
+	slot := getSlot(header.Number, totalSkipped)
 
 	if signer != p.getValidator(header.Time + skipped*p.config.Period, slot, state) {
 		return errValidatorNotElected
@@ -256,7 +257,7 @@ func (p *Panarchy) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header
 	}
 
 	parentHeader := chain.GetHeaderByHash(header.ParentHash)
-	parentSlot := getSlot(parentHeader.Number, new(big.Int).SetUint64(parentHeader.Nonce.Uint64()))
+	parentSlot := getSlot(parentHeader.Number, parentHeader.Nonce.Uint64())
 	finalizePreviousCoinbase(parentSlot, state)
 	
 	temporaryCoinbase(chain, header, txs, state)
@@ -286,7 +287,7 @@ func (p *Panarchy) Seal(chain consensus.ChainHeaderReader, block *types.Block, r
 			case <-stop:
 				return
 			case <-time.After(delay):
-				slot := currentSlot(header.Number, new(big.Int).SetUint64(nonce+i))
+				slot := getSlot(header.Number, nonce+i)
 				validator := p.getValidator(header.Time + i*p.config.Period, slot, cachedState.state)
 				if validator == signer {
 					break loop
