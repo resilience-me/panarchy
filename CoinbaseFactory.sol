@@ -12,11 +12,14 @@ contract Coinbase {
     address constant internal coinbaseFactoryContract = 0x0000000000000000000000000000000000000012;
     function sendAll(address rewardAddress) external {
         require(msg.sender == coinbaseFactoryContract);
-        selfdestruct(rewardAddress);
+        selfdestruct(payable(rewardAddress));
     }
 }
 
 contract CoinbaseFactory {
+
+    Bitpeople bitpeople = Bitpeople(0x0000000000000000000000000000000000000010);
+    Election election = Election(0x0000000000000000000000000000000000000011);
 
     uint public genesisBlockTimestamp;
     uint constant public period = 4 weeks;
@@ -26,7 +29,7 @@ contract CoinbaseFactory {
 
     event CoinbaseEvent(uint indexed slot, address indexed validator, address indexed coinbase);
 
-    function createCoinbaseContract() external returns (bool) {
+    function createCoinbaseContract() public returns (bool) {
         uint256 slot = (block.timestamp - genesisBlockTimestamp) / slotTime;
         if(slot <= nonce) return false;
         Coinbase coinbase = new Coinbase();
@@ -37,7 +40,7 @@ contract CoinbaseFactory {
         }
         uint t = nonce * slotTime / period;
         uint i = (bitpeople.seed(t) + uint256(keccak256(abi.encode(nonce)))) % election.votesLength(t);
-        Vote vote = election.votes(t, i);
+        Election.Vote memory vote = election.votes(t, i);
         if(vote.coinbase == address(0)) {
           coinbase.sendAll(vote.validator);
         } else {
@@ -45,5 +48,8 @@ contract CoinbaseFactory {
         }
         emit CoinbaseEvent(slot, vote.validator, vote.coinbase);
         return true;
+    }
+    function createLoop(uint i) external {
+        while(createCoinbaseContract() && i > 0) { i--; }
     }
 }
