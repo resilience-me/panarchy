@@ -48,6 +48,7 @@ var (
 	votesSlot		= []byte{31: 1}
 	bitpeopleContract	= common.Address{19: 0x10}
 	electionContract	= common.Address{19: 0x11}
+	coinbaseFactoryContract	= common.Address{19: 0x12}
 )
 
 var allowedFutureBlockTime uint64
@@ -202,15 +203,22 @@ func accumulateRewards(chain consensus.ChainHeaderReader, header *types.Header, 
 	state.AddBalance(coinbase, minerReward)
 }
 
-func (p *Panarchy) finalizeCoinbase(chain consensus.ChainHeaderReader, header *types.Header, elected *big.Int, validator common.Address, txs []*types.Transaction, state *state.StateDB) {
-	coinbase := p.getCoinbase(elected, state)
-	if coinbase == (common.Address{}) {
-		coinbase = validator
-	}
+func currentSlot(blockNumber *big.Int, totalSkipped *big.Int) []byte {
+	validatorHeight := new(big.Int).Add(blockNumber, totalSkipped).Bytes()
+	return common.LeftPadBytes(validatorHeight, 32)
+}
+
+func finalizeCoinbase(coinbase common.Address, state *state.StateDB) {
+	balance := state.GetBalance(electionContract)
+	state.SetBalance(electionContract, big.NewInt(0))
+	state.AddBalance(coinbase, balance)
+}
+
+func temporaryCoinbase(chain consensus.ChainHeaderReader, header *types.Header, txs []*types.Transaction, state *state.StateDB) {
 	totalFees := getTotalFees(txs)
 	state.SubBalance(header.Coinbase, totalFees)
-	state.AddBalance(coinbase, totalFees)
-	accumulateRewards(chain, header, coinbase, state)
+	state.AddBalance(electionContract, totalFees)
+	accumulateRewards(chain, header, electionContract, state)
 }
 
 func (p *Panarchy) Finalize(chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, withdrawals []*types.Withdrawal) {
@@ -233,7 +241,10 @@ func (p *Panarchy) finalize(chain consensus.ChainHeaderReader, header *types.Hea
 	if signer != p.getValidator(elected, state) {
 		return errValidatorNotElected
 	}
-	p.finalizeCoinbase(chain, header, elected, signer, txs, state)
+	slot := currentSlot(header.Number, totalSkipped)
+	coinbase := crypto.CreateAddress(coinbaseFactoryContract, slot)
+
+	p.finalizeCoinbase(chain, header, coinbase, signer, txs, state)
 	return nil
 }
 
@@ -245,6 +256,7 @@ func (p *Panarchy) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header
 		state: state,
 		number: header.Number.Uint64(),
 	}
+	temporaryCoinbase(chain, header, txs, state)
 	header.Root = state.IntermediateRoot(chain.Config().IsEnabled(chain.Config().GetEIP161dTransition, header.Number))
 
 	return types.NewBlock(header, txs, nil, receipts, trie.NewStackTrie(nil)), nil
@@ -281,13 +293,6 @@ func (p *Panarchy) Seal(chain consensus.ChainHeaderReader, block *types.Block, r
 				delay = time.Duration(p.config.Period) * time.Second
 			}
 		}
-
-		// p.finalizeCoinbase(chain, header, elected, signer, block.Transactions(), cachedState.state)
-		// stateRoot := cachedState.state.IntermediateRoot(chain.Config().IsEnabled(chain.Config().GetEIP161dTransition, header.Number))
-
-	 //        time.Sleep(10 * time.Second)
-
-		// header.Root = stateRoot
 
 		nonce +=i
 		header.Nonce = types.EncodeNonce(nonce)
@@ -379,8 +384,7 @@ func (p *Panarchy) getVote(timestamp uint64, blockNumber *big.Int, totalSkipped 
 	votesKey := crypto.Keccak256(append(currentIndex, votesSlot...))
 	votesLengthValue := state.GetState(electionContract, common.BytesToHash(votesKey))
 	votesLength := new(big.Int).SetBytes(votesLengthValue.Bytes())
-	validatorHeight := new(big.Int).Add(blockNumber, totalSkipped).Bytes()
-	validatorHeightHashed := crypto.Keccak256(common.LeftPadBytes(validatorHeight, 32))
+	validatorHeightHashed := crypto.Keccak256(currentSlot(blockNumber, totalSkipped))
 	offset := new(big.Int).SetBytes(validatorHeightHashed)
 	randomVoter := new(big.Int).Add(seed, offset)
 	randomVoter.Mod(randomVoter, votesLength)
