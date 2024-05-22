@@ -251,10 +251,6 @@ func (p *Panarchy) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header
 	if len(withdrawals) > 0 {
 		return nil, errNoWithdrawalsAllowed
 	}
-	p.cachedState = cachedState {
-		state: state,
-		number: header.Number.Uint64(),
-	}
 
 	parentHeader := chain.GetHeaderByHash(header.ParentHash)
 	parentSlot := getSlot(parentHeader.Number, parentHeader.Nonce.Uint64())
@@ -263,6 +259,11 @@ func (p *Panarchy) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header
 	temporaryCoinbase(chain, header, txs, state)
 	header.Root = state.IntermediateRoot(chain.Config().IsEnabled(chain.Config().GetEIP161dTransition, header.Number))
 
+	p.cachedState = cachedState {
+		state: state,
+		number: header.Number.Uint64(),
+	}
+	
 	return types.NewBlock(header, txs, nil, receipts, trie.NewStackTrie(nil)), nil
 }
 
