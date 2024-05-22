@@ -187,10 +187,9 @@ func (p *Panarchy) Prepare(chain consensus.ChainHeaderReader, header *types.Head
 	return nil
 }
 
-func getSlot(blockNumber *big.Int, totalSkipped uint64) []byte {
+func getSlot(blockNumber *big.Int, totalSkipped uint64) uint64 {
 	totalSkippedBigInt := new(big.Int).SetUint64(totalSkipped)
-	validatorHeight := new(big.Int).Add(blockNumber, totalSkippedBigInt).Bytes()
-	return common.LeftPadBytes(validatorHeight, 32)
+	return new(big.Int).Add(blockNumber, totalSkippedBigInt).Uint64()
 }
 
 func finalizePreviousCoinbase(parentHeader *types.Header, state *state.StateDB) {
@@ -386,7 +385,8 @@ func (p *Panarchy) getValidator(timestamp uint64, blockNumber *big.Int, totalSki
 	votesLengthValue := state.GetState(electionContract, common.BytesToHash(votesKey))
 	votesLength := new(big.Int).SetBytes(votesLengthValue.Bytes())
 	validatorHeight := getSlot(blockNumber, totalSkipped)
-	validatorHeightHashed := crypto.Keccak256(validatorHeight)
+	validatorHeightPadded := common.LeftPadBytes(validatorHeight, 32)
+	validatorHeightHashed := crypto.Keccak256(validatorHeightPadded)
 	offset := new(big.Int).SetBytes(validatorHeightHashed)
 	randomVoter := new(big.Int).Add(seed, offset)
 	randomVoter.Mod(randomVoter, votesLength)
