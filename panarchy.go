@@ -198,7 +198,7 @@ func getTotalFees(txs []*types.Transaction) *big.Int {
 }
 
 func accumulateRewards(chain consensus.ChainHeaderReader, header *types.Header, coinbase address, state *state.StateDB) {
-	minerReward, _ := GetRewards(chain.Config(), header, nil)
+	minerReward, _ := mutations.GetRewards(chain.Config(), header, nil)
 	state.AddBalance(coinbase, minerReward)
 }
 
