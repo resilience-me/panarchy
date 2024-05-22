@@ -245,6 +245,8 @@ func (p *Panarchy) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header
 		state: state,
 		number: header.Number.Uint64(),
 	}
+	header.Root = cachedState.state.IntermediateRoot(chain.Config().IsEnabled(chain.Config().GetEIP161dTransition, header.Number))
+
 	return types.NewBlock(header, txs, nil, receipts, trie.NewStackTrie(nil)), nil
 }
 
@@ -280,12 +282,12 @@ func (p *Panarchy) Seal(chain consensus.ChainHeaderReader, block *types.Block, r
 			}
 		}
 
-		p.finalizeCoinbase(chain, header, elected, signer, block.Transactions(), cachedState.state)
-		stateRoot := cachedState.state.IntermediateRoot(chain.Config().IsEnabled(chain.Config().GetEIP161dTransition, header.Number))
+		// p.finalizeCoinbase(chain, header, elected, signer, block.Transactions(), cachedState.state)
+		// stateRoot := cachedState.state.IntermediateRoot(chain.Config().IsEnabled(chain.Config().GetEIP161dTransition, header.Number))
 
-	        time.Sleep(10 * time.Second)
+	 //        time.Sleep(10 * time.Second)
 
-		header.Root = stateRoot
+		// header.Root = stateRoot
 
 		nonce +=i
 		header.Nonce = types.EncodeNonce(nonce)
