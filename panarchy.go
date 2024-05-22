@@ -237,7 +237,7 @@ func (p *Panarchy) verifySeal(chain consensus.ChainHeaderReader, header *types.H
 	totalSkipped := header.Nonce.Uint64()
 	skipped := totalSkipped - parentHeader.Nonce.Uint64()
 
-	if signer != p.getValidator(header.Time + skipped*p.config.Period, new(big.Int).SetUint64(totalSkipped), state) {
+	if signer != p.getValidator(header.Time + skipped*p.config.Period, header.Number, new(big.Int).SetUint64(totalSkipped), state) {
 		return errValidatorNotElected
 	}
 	return nil
