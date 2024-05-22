@@ -187,6 +187,18 @@ func (p *Panarchy) Prepare(chain consensus.ChainHeaderReader, header *types.Head
 	return nil
 }
 
+func currentSlot(blockNumber *big.Int, totalSkipped *big.Int) []byte {
+	validatorHeight := new(big.Int).Add(blockNumber, totalSkipped).Bytes()
+	return common.LeftPadBytes(validatorHeight, 32)
+}
+
+func finalizePreviousCoinbase(slot []byte, state *state.StateDB) {
+	coinbase := crypto.CreateAddress(coinbaseFactoryContract, slot)
+	balance := state.GetBalance(electionContract)
+	state.SetBalance(electionContract, big.NewInt(0))
+	state.AddBalance(coinbase, balance)
+}
+
 func getTotalFees(txs []*types.Transaction) *big.Int {
 	var totalFees = big.NewInt(0)
 	for _, tx := range txs {
@@ -201,18 +213,6 @@ func getTotalFees(txs []*types.Transaction) *big.Int {
 func accumulateRewards(chain consensus.ChainHeaderReader, header *types.Header, coinbase common.Address, state *state.StateDB) {
 	minerReward, _ := mutations.GetRewards(chain.Config(), header, nil)
 	state.AddBalance(coinbase, minerReward)
-}
-
-func currentSlot(blockNumber *big.Int, totalSkipped *big.Int) []byte {
-	validatorHeight := new(big.Int).Add(blockNumber, totalSkipped).Bytes()
-	return common.LeftPadBytes(validatorHeight, 32)
-}
-
-func finalizeCoinbase(slot []byte, state *state.StateDB) {
-	coinbase := crypto.CreateAddress(coinbaseFactoryContract, slot)
-	balance := state.GetBalance(electionContract)
-	state.SetBalance(electionContract, big.NewInt(0))
-	state.AddBalance(coinbase, balance)
 }
 
 func temporaryCoinbase(chain consensus.ChainHeaderReader, header *types.Header, txs []*types.Transaction, state *state.StateDB) {
@@ -254,6 +254,9 @@ func (p *Panarchy) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header
 		state: state,
 		number: header.Number.Uint64(),
 	}
+	slot := currentSlot(header.Number, new(big.Int).SetUint64(header.Nonce.Uint64()))
+
+	finalizePreviousCoinbase(slot, state)
 	temporaryCoinbase(chain, header, txs, state)
 	header.Root = state.IntermediateRoot(chain.Config().IsEnabled(chain.Config().GetEIP161dTransition, header.Number))
 
