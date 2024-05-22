@@ -49,14 +49,27 @@ contract Coinbase {
 }
 
 interface Election {
-    function schedule() external view returns (uint);
     function vote(address validator, address coinbase) external;
     function transferFrom(address from, address to, uint256 value) external;
     function allowance(uint t, address owner, address spender) external view returns (uint);
 }
 
-contract GroupReward {
-    Election public election = Election(0x0000000000000000000000000000000000000011);
+interface CoinbaseFactory {
+    function genesisBlockTimestamp() external view returns (uint);
+    function nonce() external view returns (uint);
+    function slotTime() external pure returns (uint);
+}
+
+contract Schedule {
+    uint constant public genesis = 1715407200;
+    uint constant public period = 4 weeks;
+    function schedule() public view returns(uint) { return ((block.timestamp - genesis) / period); }
+    function toSeconds(uint t) public pure returns (uint) { return genesis + t * period; }
+}
+
+contract GroupReward is Schedule {
+    Election election = Election(0x0000000000000000000000000000000000000011);
+    CoinbaseFactory coinbaseFactory = CoinbaseFactory(0x0000000000000000000000000000000000000012);
 
     address public validator;
     uint public voterShare;
@@ -75,12 +88,12 @@ contract GroupReward {
 
     function initCoinbase(uint t) internal {
         if(address(coinbase[t]) == address(0)) {
-            coinbase[t] = new Coinbase(address(this), voterShare);
+            coinbase[t] = new Coinbase(address(this), validator, voterShare);
         }
     }
 
     function vote() external {
-        uint t = election.schedule() + 1;
+        uint t = schedule() + 1;
         initCoinbase(t);
         Coinbase _coinbase = coinbase[t];
         require(election.allowance(t, msg.sender, address(this)) >= 1, "Insufficient allowance to vote");
@@ -89,11 +102,17 @@ contract GroupReward {
         election.vote(validator, address(_coinbase));
     }
 
+    function isSynced(uint t) public view returns (bool) {
+        uint syncedToSlot = coinbaseFactory.genesisBlockTimestamp() + coinbaseFactory.nonce() * coinbaseFactory.slotTime();
+        return(toSeconds(t) < syncedToSlot + coinbaseFactory.slotTime());
+    }
+
     function _claimReward(uint t) internal view returns (Coinbase) {
-        if(t == 0) t = election.schedule();
+        if(t == 0) t = schedule();
         require(t > 0, "Cannot claim reward before period zero");
         t--;
-        require(t < election.schedule(), "Cannot claim rewards for the current or future periods");
+        require(t < schedule(), "Cannot claim rewards for the current or future periods");
+        require(isSynced(t), "Transfer from temporary coinbase contracts before claiming");
         Coinbase _coinbase = coinbase[t];
         require(address(_coinbase) != address(0), "Coinbase not set for this period");
         return _coinbase;
@@ -103,6 +122,6 @@ contract GroupReward {
     }
 
     function claimValidatorReward(uint t) external onlyValidator {
-        _claimReward(t).claimValidatorReward(validator);
+        _claimReward(t).claimValidatorReward();
     }
 }
