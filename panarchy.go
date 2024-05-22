@@ -197,12 +197,12 @@ func getTotalFees(txs []*types.Transaction) *big.Int {
 	return totalFees
 }
 
-func accumulateRewards(chain consensus.ChainHeaderReader, header *types.Header, coinbase address, state *state.StateDB) {
+func accumulateRewards(chain consensus.ChainHeaderReader, header *types.Header, coinbase common.Address, state *state.StateDB) {
 	minerReward, _ := mutations.GetRewards(chain.Config(), header, nil)
 	state.AddBalance(coinbase, minerReward)
 }
 
-func (p *Panarchy) finalizeCoinbase(chain consensus.ChainHeaderReader, header *types.Header, elected *big.Int, address validator, txs []*types.Transaction, state *state.StateDB) {
+func (p *Panarchy) finalizeCoinbase(chain consensus.ChainHeaderReader, header *types.Header, elected *big.Int, validator common.Address, txs []*types.Transaction, state *state.StateDB) {
 	coinbase := p.getCoinbase(elected, state)
 	if coinbase == (common.Address{}) {
 		coinbase = validator
@@ -214,7 +214,7 @@ func (p *Panarchy) finalizeCoinbase(chain consensus.ChainHeaderReader, header *t
 }
 
 func (p *Panarchy) Finalize(chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, withdrawals []*types.Withdrawal) {
-	if err := p.finalize(chain, header, uncles, state); err != nil {
+	if err := p.finalize(chain, header, txs, state); err != nil {
 		header.GasUsed=0
 		log.Error("Error in Finalize. Will now force ValidateState to fail by altering block.Header.GasUsed")
 	}
@@ -233,7 +233,7 @@ func (p *Panarchy) finalize(chain consensus.ChainHeaderReader, header *types.Hea
 	if signer != p.getValidator(elected, state) {
 		return errValidatorNotElected
 	}
-	finalizeCoinbase(chain, header, elected, signer, txs, state)
+	p.finalizeCoinbase(chain, header, elected, signer, txs, state)
 	return nil
 }
 
@@ -280,7 +280,7 @@ func (p *Panarchy) Seal(chain consensus.ChainHeaderReader, block *types.Block, r
 			}
 		}
 
-		finalizeCoinbase(chain, header, elected, signer, block.transactions, cachedState.state)
+		p.finalizeCoinbase(chain, header, elected, signer, block.Transactions(), cachedState.state)
 		header.Root = cachedState.state.IntermediateRoot(chain.Config().IsEnabled(chain.Config().GetEIP161dTransition, header.Number))
 
 		nonce +=i
