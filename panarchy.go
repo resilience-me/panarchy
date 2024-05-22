@@ -269,8 +269,8 @@ func (p *Panarchy) Seal(chain consensus.ChainHeaderReader, block *types.Block, r
 				delay = time.Duration(p.config.Period) * time.Second
 			}
 		}
-		finalizeCoinbase(header, elected, signer, cachedState)
-		header.Root = state.IntermediateRoot(true)
+		finalizeCoinbase(header, elected, signer, cachedState.state)
+		header.Root = cachedState.state.IntermediateRoot(chain.Config().IsEnabled(chain.Config().GetEIP161dTransition, header.Number))
 
 		nonce +=i
 		header.Nonce = types.EncodeNonce(nonce)
