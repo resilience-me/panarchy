@@ -22,6 +22,11 @@ body {
 	margin-bottom: 10px; /* Added margin-bottom property */
 }
 
+.dropdownMenu select option {
+    color: #FFF; /* Color for the option text */
+    background-color: #3399dd; /* Background color for the option */
+}
+
 /* Input and Button Base Styles */
 .address-input, .login-button, .load-button {
     border-radius: 4px;
