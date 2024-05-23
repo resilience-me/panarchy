@@ -381,14 +381,15 @@ function handleOtherScenarios(address, data, isMetamask, bitpeople) {
                 registerBtn.textContent = 'Register';
                 registerBtn.addEventListener('click', () => bitpeople.register(randomNumber));
                 responseDisplay.appendChild(registerBtn);
-            } else {
+		appendOption("Register");
+		createTransferDiv(data.contracts.bitpeople.currentData.account.tokens.register);
+		appendOption("Transfer");
+	    } else {
 		responseDisplay.innerHTML += [
 		    '<p>Registration closes ' + scheduleUtil.halftimeString(data) + '</p>',
 		    '<p>Log in with a wallet to register</p>'
 		].join('');
             }
-	    createTransferDiv(data.contracts.bitpeople.currentData.account.tokens.register);
-	    appendOption("Transfer");
 	} else {
             responseDisplay.innerText = 'The next registration period opens on: ' + scheduleUtil.nextPeriodString(data);
         }
