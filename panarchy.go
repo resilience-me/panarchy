@@ -188,7 +188,7 @@ func (p *Panarchy) Prepare(chain consensus.ChainHeaderReader, header *types.Head
 }
 
 func (p *Panarchy) Finalize(chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, withdrawals []*types.Withdrawal) {
-	if err := p.verifySeal(header, state); err != nil {
+	if err := p.verifySeal(chain, header, state); err != nil {
 		header.GasUsed=0
 		log.Error("Error in Finalize. Will now force ValidateState to fail by altering block.Header.GasUsed")
 	}
