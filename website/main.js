@@ -364,8 +364,7 @@ function handleOtherScenarios(address, data, isMetamask, bitpeople) {
 }
 
 async function fromAndGasPrice(account, web3) {
-	const gasPrice = 1000000000;
-	// const gasPrice = await web3.eth.getGasPrice();
+	const gasPrice = await web3.eth.getGasPrice();
 	return {
             from: account,
             gasPrice: gasPrice
