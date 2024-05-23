@@ -341,8 +341,8 @@ function createTransferDiv(tokens, bitpeople) {
     transferBtn.textContent = 'Transfer';
     transferBtn.disabled = true;
     transferBtn.addEventListener('click', function() {
-        const amount = document.getElementById('amount').value;
-        const to = document.getElementById('to').value;
+        const amount = amountInput.value;
+        const to = toInput.value;
         bitpeople.transfer(to, value, 1);
     });
 
