@@ -386,7 +386,7 @@ function createRegisterDiv() {
     responseDisplay.appendChild(registerDiv);
 }
 
-function promptRegistration(registerDiv) {
+function promptRegistration(registerDiv, bitpeople) {
     const randomNumber = generateRandomNumber();
     registerDiv.innerHTML += [
         '<p>To register, you need to contribute a random number to the random number generator.</p>',
@@ -408,7 +408,7 @@ function handleOtherScenarios(address, data, isMetamask, bitpeople) {
 	if (data.schedule.currentSchedule.quarter < 2) {
             registerDiv.innerHTML = userStringForLoggedInOrNot(isMetamask, address) + ' can register for the event';
             if (isMetamask) {
-		promptRegistration(registerDiv);
+		promptRegistration(registerDiv, bitpeople);
 		createTransferDiv(data.contracts.bitpeople.currentData.account.tokens, bitpeople);
 		appendOption("Transfer");
 	    } else {
