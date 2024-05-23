@@ -361,7 +361,6 @@ function createTransferDiv(tokens, bitpeople) {
         }
     }
 
-    transferDiv.appendChild(infoText);
     transferDiv.appendChild(toInput);
     transferDiv.appendChild(amountInput);
     transferDiv.appendChild(transferBtn);
