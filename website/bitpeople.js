@@ -113,6 +113,14 @@ class Bitpeople {
         this.txObj = txObj;
     }
 
+    static helper = {
+        tokenTypes: ["proof-of-unique-human", "register", "opt in", "border vote"],
+
+        getTokenText(value) {
+            return value === 1 ? 'token' : 'tokens';
+        }
+    };
+
     async register(randomNumber) {
         try {
             const randomHash = this.web3.utils.sha3('0x' + randomNumber);
@@ -199,9 +207,7 @@ class Bitpeople {
 		transferDiv.innerHTML = `Transaction submitted. Hash: <span class="truncated-address">${hash}</span>`;
 	    });
 	    console.log('Transfer successful:', result);
-	    const tokenTypes = ["proof-of-unique-human", "register", "opt in", "border vote"];
-	    const tokenText = value === 1 ? 'token' : 'tokens';
-	    transferDiv.innerHTML = `Transferred ${value} ${tokenTypes[token]} ${tokenText} to <span class="truncated-address">${to}</span>`;
+	    transferDiv.innerHTML = `Transferred ${value} ${Bitpeople.helper.tokenTypes[token]} ${Bitpeople.helper.tokenText(value)} to <span class="truncated-address">${to}</span>`;
 	} catch (error) {
 	    console.error('Transaction error:', error);
 	    transferDiv.innerText = 'Error transferring token';
