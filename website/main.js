@@ -460,6 +460,15 @@ function resetDisplay() {
 }
 
 function setupEventListeners() {
+    document.getElementById('options').addEventListener('change', function(event) {
+	const transferDiv = document.getElementById('transfer');
+	if (event.target.value === 'Transfer') {
+	    transferDiv.style.display = 'block';
+	} else {
+	    transferDiv.style.display = 'none';
+	}
+    });
+
     addressInput.addEventListener('input', () => {
         loadAddressButton.disabled = !formats.isValidAddress(addressInput.value.trim());
     });
