@@ -207,7 +207,7 @@ class Bitpeople {
 		transferDiv.innerHTML = `Transaction submitted. Hash: <span class="truncated-address">${hash}</span>`;
 	    });
 	    console.log('Transfer successful:', result);
-	    transferDiv.innerHTML = `Transferred ${value} ${Bitpeople.helper.tokenTypes[token]} ${Bitpeople.helper.tokenText(value)} to <span class="truncated-address">${to}</span>`;
+	    transferDiv.innerHTML = `Transferred ${value} ${Bitpeople.helper.tokenTypes[token]} ${Bitpeople.helper.getTokenText(value)} to <span class="truncated-address">${to}</span>`;
 	} catch (error) {
 	    console.error('Transaction error:', error);
 	    transferDiv.innerText = 'Error transferring token';
