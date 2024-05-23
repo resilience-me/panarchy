@@ -1,5 +1,3 @@
-// reverted to commit 5eb083bf11b12f7e2eee07d18282f941281c7130. automated voter rewards do not fit into consensus engine interface well as custom coinbase cannot be set via Prepare. voter rewards done manually.
-
 package clique
 
 import (
