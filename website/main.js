@@ -339,7 +339,7 @@ function createTransferDiv(tokens, bitpeople) {
     toParagraph.appendChild(toInput);
 
     const amountParagraph = document.createElement('p');
-    amountAndSendParagraph.innerText = 'Amount:';
+    amountParagraph.innerText = 'Amount:';
 
     const amountInput = document.createElement('input');
     amountInput.type = 'text';
