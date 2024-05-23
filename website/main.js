@@ -321,7 +321,7 @@ function generateRandomNumber() {
     return randomNumber;
 }
 
-function createTransferDiv(tokens) {
+function createTransferDiv(tokens, bitpeople) {
     const transferDiv = document.createElement('div');
     transferDiv.id = 'transfer';
     transferDiv.style.display = 'none';
@@ -343,7 +343,7 @@ function createTransferDiv(tokens) {
     transferBtn.addEventListener('click', function() {
         const amount = document.getElementById('amount').value;
         const to = document.getElementById('to').value;
-        transferAmount(amount, to);
+        bitpeople.transfer(to, value, 1);
     });
 
     amountInput.addEventListener('input', validateInputs);
@@ -394,7 +394,7 @@ function handleOtherScenarios(address, data, isMetamask, bitpeople) {
             if (isMetamask) {
                 createRegisterDiv();
 		appendOption("Register");
-		createTransferDiv(data.contracts.bitpeople.currentData.account.tokens.register);
+		createTransferDiv(data.contracts.bitpeople.currentData.account.tokens.register, bitpeople);
 		appendOption("Transfer");
 	    } else {
 		responseDisplay.innerHTML += [
