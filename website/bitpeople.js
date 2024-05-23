@@ -190,17 +190,22 @@ class Bitpeople {
         }
     }
     async transfer(to, value, token) {
-        const transferDiv = document.getElementById('transfer');
-        try {
-            const result = await this.bitpeopleContract.methods.transfer(to, value, token).send(this.txObj);
+	const transferDiv = document.getElementById('transfer');
+	
+	try {
+	    const result = await this.bitpeopleContract.methods.transfer(to, value, token).send(this.txObj)
+	    .on('transactionHash', function(hash) {
+		console.log('Transaction hash:', hash);
+		transferDiv.innerHTML = `Transaction submitted. Hash: <span class="truncated-address">${hash}</span>`;
+	    });
 	    console.log('Transfer successful:', result);
 	    const tokenTypes = ["proof-of-unique-human", "register", "opt in", "border vote"];
 	    const tokenText = value === 1 ? 'token' : 'tokens';
 	    transferDiv.innerHTML = `Transferred ${value} ${tokenTypes[token]} ${tokenText} to <span class="truncated-address">${to}</span>`;
-        } catch (error) {
-            transferDiv.innerText = 'Error transferring token';
-            console.error('Error transferring token:', error);
-        }
+	} catch (error) {
+	    console.error('Transaction error:', error);
+	    transferDiv.innerText = 'Error transferring token';
+	}
     }
     async claimProofOfUniqueHuman() {
         try {
