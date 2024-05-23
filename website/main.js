@@ -7,7 +7,7 @@ const responseDisplay = document.getElementById('response');
 const addressInput = document.getElementById('addressInput');
 const loadAddressButton = document.getElementById('loadAddressButton');
 
-let isHandlingAccountChange = false;
+let isFetchingAccountInfo = false;
 
 var scheduleUtil = {
     dateAndTimeString(eventDate) {
@@ -91,8 +91,15 @@ var helper = {
 };
 
 async function fetchAccountInfo(address, bitpeople) {
+    if (isFetchingAccountInfo) {
+        console.log('Another account change is already being handled.');
+        return;
+    }
+    
+    isFetchingAccountInfo = true;
+    
     try {
-	const isMetamask = bitpeople instanceof Bitpeople;
+        const isMetamask = bitpeople instanceof Bitpeople;
         const response = await fetch(apiURL + address);
         const data = await response.json();
 
@@ -102,22 +109,25 @@ async function fetchAccountInfo(address, bitpeople) {
             handlePoUH(address, data, isMetamask, bitpeople);
         } else if (data.contracts.bitpeople.currentData.account.tokens.proofOfUniqueHuman > 0) {
             handleClaimPoUH(address, data, isMetamask, bitpeople);
-	} else if (helper.inPseudonymEvent(data)) {
+        } else if (helper.inPseudonymEvent(data)) {
             handlePseudonymEvent(address, data, isMetamask, bitpeople);
         } else if (helper.isRegistered(data)) {
             handleRegistrationStatus(address, data, isMetamask, bitpeople);
         } else if (helper.isOptIn(data)) {
             handleOptInStatus(address, data, isMetamask);
-	} else {
+        } else {
             handleOtherScenarios(address, data, isMetamask, bitpeople);
         }
-	if(options.options.length > 1) {
-	    dropdownMenu.style.display = 'block';
-	}
+        if(options.options.length > 1) {
+            dropdownMenu.style.display = 'block';
+        }
     } catch (error) {
         console.error('Error fetching account info:', error);
+    } finally {
+        isFetchingAccountInfo = false;
     }
 }
+
 function appendOption(optionText) {
     const option = document.createElement('option');
     option.textContent = optionText;
@@ -431,18 +441,10 @@ function setupEventListeners() {
     });
 
     window.ethereum?.on('accountsChanged', async (accounts) => {
-	if (isHandlingAccountChange) {
-	    console.log('Another account change is already being handled.');
-	    return;
-	}
-	isHandlingAccountChange = true;
 	try {
-	    resetDisplay();
 	    await handleAccountChange(accounts);
 	} catch (error) {
 	    console.error('Error handling account change:', error);
-	} finally {
-	    isHandlingAccountChange = false;
 	}
     });
 }
