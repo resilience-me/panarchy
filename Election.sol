@@ -1,4 +1,8 @@
-interface Bitpeople { function proofOfUniqueHuman(uint t, address account) external view returns (bool); }
+// skipping automated voter rewards as it does not work with consensus engine interface (coinbase cannot 
+// be set manually via Prepare as worker.go overrides that, so getting the voter rewards to work requires too many extra steps)
+// reverting this contract to 1e9e48415c85396c0362ab77a1326af70fa285f4
+
+contract Bitpeople { function proofOfUniqueHuman(uint t, address account) external view returns (bool) {} }
 
 contract Schedule {
 
@@ -14,46 +18,33 @@ contract Election is Schedule {
 
     Bitpeople bitpeople = Bitpeople(0x0000000000000000000000000000000000000010);
 
-    struct Vote {
-        address validator;
-        address coinbase;
-    }
-
     struct Data {
-        Vote[] votes;
+        address[] election;
         mapping (address => uint) balanceOf;
         mapping (address => mapping (address => uint)) allowance;
         mapping (address => bool) claimedSuffrageToken;
     }
-    
+
     mapping (uint => Data) data;
 
-    mapping (address => address) validatorContract;
-
-    event Voted(uint indexed schedule, address indexed validator, address indexed coinbase);
+    event Elected(uint indexed schedule, address indexed validator);
 
     event Transfer(uint indexed schedule, address indexed from, address indexed to, uint256 value);
     event Approval(uint indexed schedule, address indexed owner, address indexed spender, uint256 value);
 
-    function vote(address validator, address coinbase) external {
+    function vote(address validator) external {
         uint t = schedule();
-        Data storage currentData = data[t];
-        require(!halftime(t), "Voting is only allowed before the halfway point");
-        require(currentData.balanceOf[msg.sender] >= 1, "Balance decrement failed: Insufficient balance");
-        if(coinbase != address(0)) require(msg.sender == validatorContract[validator], "Caller is not authorized to set up coinbase");
-        currentData.balanceOf[msg.sender]--;
-        data[t+1].votes.push(Vote(validator, coinbase));
-        emit Voted(t+1, validator, coinbase);
-    }
-
-    function authorizeValidatorContract(address _validatorContract) external {
-        validatorContract[msg.sender] = _validatorContract;
+        require(!halftime(t), "Voting is only allowed before the halfway point.");
+        require(data[t].balanceOf[msg.sender] >= 1, "Balance decrement failed: Insufficient balance");
+        data[t].balanceOf[msg.sender]--;
+        data[t+1].election.push(validator);
+        emit Elected(t+1, validator);
     }
 
     function allocateSuffrageToken() external {
         uint t = schedule();
-        require(bitpeople.proofOfUniqueHuman(t, msg.sender), "Failed to verify proof-of-unique-human");
-        require(!data[t].claimedSuffrageToken[msg.sender], "Suffrage token already claimed");
+        require(bitpeople.proofOfUniqueHuman(t, msg.sender), "Failed to verify proof-of-unique-human.");
+        require(!data[t].claimedSuffrageToken[msg.sender], "Suffrage token already claimed.");
         data[t].balanceOf[msg.sender]++;
         data[t].claimedSuffrageToken[msg.sender] = true;
     }
@@ -79,8 +70,8 @@ contract Election is Schedule {
         data[t].allowance[from][msg.sender] -= value;
     }
 
-    function votes(uint t, uint i) external view returns (Vote memory) { return data[t].votes[i]; }
-    function votesLength(uint t) external view returns (uint) { return data[t].votes.length; }
+    function election(uint t, uint i) external view returns (address) { return data[t].election[i]; }
+    function electionLength(uint t) external view returns (uint) { return data[t].election.length; }
     function balanceOf(uint t, address account) external view returns (uint) { return data[t].balanceOf[account]; }
     function allowance(uint t, address owner, address spender) external view returns (uint) { return data[t].allowance[owner][spender]; }
     function claimedSuffrageToken(uint t, address account) external view returns (bool) { return data[t].claimedSuffrageToken[account]; }
