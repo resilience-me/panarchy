@@ -327,7 +327,7 @@ function createTransferDiv(tokens, bitpeople) {
     transferDiv.style.display = 'none';
 
     const infoText = document.createElement('p');
-    infoText.textContent = `You have  ${value} ${Bitpeople.helper.tokenTypes[token]} ${Bitpeople.helper.tokenText(value)}.`;
+    infoText.textContent = `You have ${value} ${Bitpeople.helper.tokenTypes[token]} ${Bitpeople.helper.tokenText(value)}.`;
 
     const toInput = document.createElement('input');
     toInput.type = 'text';
