@@ -190,13 +190,16 @@ class Bitpeople {
         }
     }
     async transfer(to, value, token) {
+        const transferDiv = document.getElementById('transfer');
         try {
             const result = await this.bitpeopleContract.methods.transfer(to, value, token).send(this.txObj);
 	    console.log('Transfer successful:', result);
+	    const tokenTypes = ["proof-of-unique-human", "register", "opt in", "border vote"];
+	    const tokenTypeText = tokenTypes[token];
 	    const tokenText = value === 1 ? 'token' : 'tokens';
-	    responseDisplay.innerHTML = `Transferred ${value} ${tokenText} to <span class="truncated-address">${to}</span>`;
+	    transferDiv.innerHTML = `Transferred ${value} ${tokenTypeText} ${tokenText} to <span class="truncated-address">${to}</span>`;
         } catch (error) {
-            responseDisplay.innerText = 'Error transferring token';
+            transferDiv.innerText = 'Error transferring token';
             console.error('Error transferring token:', error);
         }
     }
