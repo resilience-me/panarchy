@@ -1,8 +1,4 @@
-// skipping automated voter rewards as it does not work with consensus engine interface (coinbase cannot 
-// be set manually via Prepare as worker.go overrides that, so getting the voter rewards to work requires too many extra steps)
-// reverting this contract to 1e9e48415c85396c0362ab77a1326af70fa285f4
-
-contract Bitpeople { function proofOfUniqueHuman(uint t, address account) external view returns (bool) {} }
+interface Bitpeople { function proofOfUniqueHuman(uint t, address account) external view returns (bool); }
 
 contract Schedule {
 
@@ -27,7 +23,7 @@ contract Election is Schedule {
 
     mapping (uint => Data) data;
 
-    event Elected(uint indexed schedule, address indexed validator);
+    event Vote(uint indexed schedule, address indexed validator);
 
     event Transfer(uint indexed schedule, address indexed from, address indexed to, uint256 value);
     event Approval(uint indexed schedule, address indexed owner, address indexed spender, uint256 value);
@@ -38,13 +34,13 @@ contract Election is Schedule {
         require(data[t].balanceOf[msg.sender] >= 1, "Balance decrement failed: Insufficient balance");
         data[t].balanceOf[msg.sender]--;
         data[t+1].election.push(validator);
-        emit Elected(t+1, validator);
+        emit Vote(t+1, validator);
     }
 
     function allocateSuffrageToken() external {
         uint t = schedule();
-        require(bitpeople.proofOfUniqueHuman(t, msg.sender), "Failed to verify proof-of-unique-human.");
-        require(!data[t].claimedSuffrageToken[msg.sender], "Suffrage token already claimed.");
+        require(bitpeople.proofOfUniqueHuman(t, msg.sender), "Failed to verify proof-of-unique-human");
+        require(!data[t].claimedSuffrageToken[msg.sender], "Suffrage token already claimed");
         data[t].balanceOf[msg.sender]++;
         data[t].claimedSuffrageToken[msg.sender] = true;
     }
