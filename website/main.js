@@ -421,7 +421,7 @@ function setupEventListeners() {
     document.getElementById('loginButton').addEventListener('click', async () => {
         if (window.ethereum) {
             try {
-                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
             } catch (error) {
                 console.error('User denied account access:', error);
             }
@@ -464,8 +464,7 @@ window.addEventListener('load', async () => {
     if(!await readAddressFromURL()) {
         if (window.ethereum) {
             try {
-                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-                await handleAccountChange(accounts);
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
             } catch (error) {
                 console.error('Error fetching accounts:', error);
             }
