@@ -122,13 +122,18 @@ class Bitpeople {
     };
 
     async register(randomNumber) {
+	const registerDiv = document.getElementById('register');
         try {
             const randomHash = this.web3.utils.sha3('0x' + randomNumber);
             const result = await this.bitpeopleContract.methods.register(randomHash).send(this.txObj);
+	    .on('transactionHash', function(hash) {
+		console.log('Transaction hash:', hash);
+		registerDiv.innerHTML = `Transaction submitted. Hash: <span class="truncated-hex">${hash}</span>`;
+	    });
             console.log('Registration successful:', result);
-            responseDisplay.innerHTML = `You are registered for the upcoming pseudonym event. Remember to write down your random number <span class="truncated-hex">${randomNumber},</span> you will need it to claim your proof of unique human later.`;
+            registerDiv.innerHTML = `You are registered for the upcoming pseudonym event. Remember to write down your random number <span class="truncated-hex">${randomNumber},</span> you will need it to claim your proof of unique human later.`;
         } catch (error) {
-            responseDisplay.innerText = 'Error registering';
+            registerDiv.innerText = 'Error registering';
             console.error('Error registering:', error);
         }
     }
@@ -187,6 +192,7 @@ class Bitpeople {
             console.error('Error collecting tokens:', error);
         }
     }
+
     async revealHash(preimage) {
         try {
             const result = await this.bitpeopleContract.methods.revealHash(preimage).send(this.txObj);
@@ -197,6 +203,7 @@ class Bitpeople {
             console.error('Error revealing random number:', error);
         }
     }
+
     async transfer(to, value, token) {
 	const transferDiv = document.getElementById('transfer');
 	
@@ -213,6 +220,7 @@ class Bitpeople {
 	    transferDiv.innerText = 'Error transferring token';
 	}
     }
+
     async claimProofOfUniqueHuman() {
         try {
             const result = await this.bitpeopleContract.methods.claimProofOfUniqueHuman().send(this.txObj);
