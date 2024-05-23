@@ -1,3 +1,7 @@
+// edit: given that consensus engine interface in Go-Ethereum/core-geth does not allow changing coinbase via Prepare method (any change is bypassed in worker.go calling context, the one that called Prepare), 
+// I will skip automated voter rewards for now, since forcing them in makes things too convoluted. they can easily be added if a version that does not use the traditional consensus engine interface is used
+// this file will be deleted, this is a log message...
+
 interface Bitpeople { function seed(uint t) external view returns (uint); }
 
 interface Election {
