@@ -326,14 +326,17 @@ function createTransferDiv(tokens, bitpeople) {
     transferDiv.id = 'transfer';
     transferDiv.style.display = 'none';
 
-    transferDiv.innerHTML = `You have ${tokens.register} ${Bitpeople.helper.tokenTypes[1]} ${Bitpeople.helper.getTokenText(tokens.register)}.<p>Transfer tokens to another account:</p>`;
+    transferDiv.innerHTML = `You have ${tokens.register} ${Bitpeople.helper.tokenTypes[1]} ${Bitpeople.helper.getTokenText(tokens.register)}.`;
 
+    const toParagraph = document.createElement('p');
+    toParagraph.innerText = 'Transfer tokens to another account:';
 
-	
     const toInput = document.createElement('input');
     toInput.type = 'text';
     toInput.id = 'to';
     toInput.placeholder = 'Recipient address';
+
+    toParagraph.appendChild(toInput);
 
     const amountInput = document.createElement('input');
     amountInput.type = 'text';
@@ -363,7 +366,7 @@ function createTransferDiv(tokens, bitpeople) {
         }
     }
 
-    transferDiv.appendChild(toInput);
+    transferDiv.appendChild(toParagraph);
     transferDiv.appendChild(amountInput);
     transferDiv.appendChild(transferBtn);
 
