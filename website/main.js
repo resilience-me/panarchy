@@ -120,7 +120,7 @@ async function fetchAccountInfo(address, bitpeople) {
         }
         if(options.options.length > 1) {
             dropdownMenu.style.display = 'block';
-            options.selectedIndex = 1;
+            options.selectedIndex = 0;
             options.dispatchEvent(new Event('change'));
         }
     } catch (error) {
