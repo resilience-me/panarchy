@@ -338,13 +338,15 @@ function createTransferDiv(tokens, bitpeople) {
 
     toParagraph.appendChild(toInput);
 
-    const amountAndSendParagraph = document.createElement('p');
+    const amountParagraph = document.createElement('p');
     amountAndSendParagraph.innerText = 'Amount:';
 
     const amountInput = document.createElement('input');
     amountInput.type = 'text';
     amountInput.id = 'amount';
-    amountInput.placeholder = tokens.register;
+    amountInput.placeholder = 0;
+
+    amountParagraph.appendChild(amountInput);
 
     const transferBtn = document.createElement('button');
     transferBtn.id = 'transferBtn';
@@ -355,9 +357,6 @@ function createTransferDiv(tokens, bitpeople) {
         const to = document.getElementById('to').value;
         bitpeople.transfer(to, amount, 1);
     });
-
-    amountAndSendParagraph.appendChild(amountInput);
-    amountAndSendParagraph.appendChild(transferBtn);
 
     amountInput.addEventListener('input', validateInputs);
     toInput.addEventListener('input', validateInputs);
@@ -373,7 +372,8 @@ function createTransferDiv(tokens, bitpeople) {
     }
 
     transferDiv.appendChild(toParagraph);
-    transferDiv.appendChild(amountAndSendParagraph);
+    transferDiv.appendChild(amountParagraph);
+    transferDiv.appendChild(transferBtn);
 
     responseDisplay.appendChild(transferDiv);
 }
