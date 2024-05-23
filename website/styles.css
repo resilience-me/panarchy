@@ -22,16 +22,6 @@ body {
 	margin-bottom: 10px; /* Added margin-bottom property */
 }
 
-.dropdownMenu select option {
-    color: #FFF; /* Color for the option text */
-    background-color: #3399dd; /* Background color for the option */
-}
-
-.dropdownMenu select:focus option:checked {
-    color: #FFF; /* Text color of the selected option */
-    background-color: #3399dd; /* Background color of the selected option */
-}
-
 /* Input and Button Base Styles */
 .address-input, .login-button, .load-button {
     border-radius: 4px;
