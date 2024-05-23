@@ -319,6 +319,51 @@ function generateRandomNumber() {
     return randomNumber;
 }
 
+function createTransferDiv(tokens) {
+    const transferDiv = document.createElement('div');
+    transferDiv.id = 'transfer';
+    transferDiv.style.display = 'none';
+
+    const toInput = document.createElement('input');
+    toInput.type = 'text';
+    toInput.id = 'to';
+    toInput.placeholder = 'Recipient address';
+
+    const amountInput = document.createElement('input');
+    amountInput.type = 'text';
+    amountInput.id = 'amount';
+    amountInput.placeholder = tokens;
+
+    const transferBtn = document.createElement('button');
+    transferBtn.id = 'transferBtn';
+    transferBtn.textContent = 'Transfer';
+    transferBtn.disabled = true;
+    transferBtn.addEventListener('click', function() {
+        const amount = document.getElementById('amount').value;
+        const to = document.getElementById('to').value;
+        transferAmount(amount, to);
+    });
+
+    amountInput.addEventListener('input', validateInputs);
+    toInput.addEventListener('input', validateInputs);
+
+    function validateInputs() {
+        const amount = amountInput.value;
+        const to = toInput.value;
+        if (!isNaN(amount) && amount >= 0 && amount <= tokens && formats.isValidAddress(to)) {
+            transferBtn.disabled = false;
+        } else {
+            transferBtn.disabled = true;
+        }
+    }
+
+    transferDiv.appendChild(toInput);
+    transferDiv.appendChild(amountInput);
+    transferDiv.appendChild(transferBtn);
+
+    responseDisplay.appendChild(transferDiv);
+}
+
 function handleOtherScenarios(address, data, isMetamask, bitpeople) {
     if (data.contracts.bitpeople.currentData.account.tokens.register > 0) {
         if (data.schedule.currentSchedule.quarter < 2) {
@@ -342,7 +387,9 @@ function handleOtherScenarios(address, data, isMetamask, bitpeople) {
 		    '<p>Log in with a wallet to register</p>'
 		].join('');
             }
-        } else {
+	    createTransferDiv(data.contracts.bitpeople.currentData.account.tokens.register);
+	    appendOption("Transfer");
+	} else {
             responseDisplay.innerText = 'The next registration period opens on: ' + scheduleUtil.nextPeriodString(data);
         }
     } else if (data.contracts.bitpeople.currentData.account.tokens.optIn > 0) {
