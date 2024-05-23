@@ -334,7 +334,7 @@ function createTransferDiv(tokens, bitpeople) {
     const amountInput = document.createElement('input');
     amountInput.type = 'text';
     amountInput.id = 'amount';
-    amountInput.placeholder = tokens;
+    amountInput.placeholder = tokens.register;
 
     const transferBtn = document.createElement('button');
     transferBtn.id = 'transferBtn';
@@ -370,7 +370,10 @@ function createRegisterDiv() {
     const registerDiv = document.createElement('div');
     registerDiv.id = 'register';
     registerDiv.style.display = 'none';
+    responseDisplay.appendChild(registerDiv);
+}
 
+function promptRegistration() {
     const randomNumber = generateRandomNumber();
 
     registerDiv.innerHTML += [
@@ -383,27 +386,26 @@ function createRegisterDiv() {
     registerBtn.textContent = 'Register';
     registerBtn.addEventListener('click', () => bitpeople.register(randomNumber));
     registerDiv.appendChild(registerBtn);
-
-    responseDisplay.appendChild(registerDiv);
 }
 
 function handleOtherScenarios(address, data, isMetamask, bitpeople) {
     if (data.contracts.bitpeople.currentData.account.tokens.register > 0) {
-        if (data.schedule.currentSchedule.quarter < 2) {
-            responseDisplay.innerHTML = userStringForLoggedInOrNot(isMetamask, address) + ' can register for the event';
+	createRegisterDiv();
+	appendOption("Register");
+	if (data.schedule.currentSchedule.quarter < 2) {
+            registerDiv.innerHTML = userStringForLoggedInOrNot(isMetamask, address) + ' can register for the event';
             if (isMetamask) {
-                createRegisterDiv();
-		appendOption("Register");
-		createTransferDiv(data.contracts.bitpeople.currentData.account.tokens.register, bitpeople);
+		promptRegistration();
+		createTransferDiv(data.contracts.bitpeople.currentData.account.tokens, bitpeople);
 		appendOption("Transfer");
 	    } else {
-		responseDisplay.innerHTML += [
+		registerDiv.innerHTML += [
 		    '<p>Registration closes ' + scheduleUtil.halftimeString(data) + '</p>',
 		    '<p>Log in with a wallet to register</p>'
 		].join('');
             }
 	} else {
-            responseDisplay.innerText = 'The next registration period opens on: ' + scheduleUtil.nextPeriodString(data);
+            registerDiv.innerText = 'The next registration period opens on: ' + scheduleUtil.nextPeriodString(data);
         }
     } else if (data.contracts.bitpeople.currentData.account.tokens.optIn > 0) {
         if (data.schedule.currentSchedule.quarter < 2) {
