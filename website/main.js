@@ -120,6 +120,8 @@ async function fetchAccountInfo(address, bitpeople) {
         }
         if(options.options.length > 1) {
             dropdownMenu.style.display = 'block';
+            options.selectedIndex = 1;
+            options.dispatchEvent(new Event('change'));
         }
     } catch (error) {
         console.error('Error fetching account info:', error);
@@ -364,23 +366,33 @@ function createTransferDiv(tokens) {
     responseDisplay.appendChild(transferDiv);
 }
 
+function createRegisterDiv() {
+    const registerDiv = document.createElement('div');
+    registerDiv.id = 'register';
+    registerDiv.style.display = 'none';
+
+    const randomNumber = generateRandomNumber();
+
+    registerDiv.innerHTML += [
+        '<p>To register, you need to contribute a random number to the random number generator.</p>',
+        `<p>This site has generated one for you: <input type="text" value="${randomNumber}" size="64" style="max-width: 100%; box-sizing: border-box;" readonly></p>`,
+        '<p>Write it down, you will need it to claim your proof-of-unique-human later.</p>'
+    ].join('');
+
+    const registerBtn = document.createElement('button');
+    registerBtn.textContent = 'Register';
+    registerBtn.addEventListener('click', () => bitpeople.register(randomNumber));
+    registerDiv.appendChild(registerBtn);
+
+    responseDisplay.appendChild(registerDiv);
+}
+
 function handleOtherScenarios(address, data, isMetamask, bitpeople) {
     if (data.contracts.bitpeople.currentData.account.tokens.register > 0) {
         if (data.schedule.currentSchedule.quarter < 2) {
             responseDisplay.innerHTML = userStringForLoggedInOrNot(isMetamask, address) + ' can register for the event';
             if (isMetamask) {
-                const randomNumber = generateRandomNumber();
-
-                responseDisplay.innerHTML += [
-                    '<p>To register, you need to contribute a random number to the random number generator.</p>',
-                    `<p>This site has generated one for you: <input type="text" value="${randomNumber}" size="64" style="max-width: 100%; box-sizing: border-box;" readonly></p>`,
-                    '<p>Write it down, you will need it to claim your proof-of-unique-human later.</p>'
-                ].join('');
-		    
-                const registerBtn = document.createElement('button');
-                registerBtn.textContent = 'Register';
-                registerBtn.addEventListener('click', () => bitpeople.register(randomNumber));
-                responseDisplay.appendChild(registerBtn);
+                createRegisterDiv();
 		appendOption("Register");
 		createTransferDiv(data.contracts.bitpeople.currentData.account.tokens.register);
 		appendOption("Transfer");
