@@ -461,11 +461,15 @@ function resetDisplay() {
 
 function setupEventListeners() {
     document.getElementById('options').addEventListener('change', function(event) {
-	const transferDiv = document.getElementById('transfer');
-	if (event.target.value === 'Transfer') {
-	    transferDiv.style.display = 'block';
-	} else {
-	    transferDiv.style.display = 'none';
+	const allOptions = document.getElementById('options').options;
+	const selectedValue = event.target.value.toLowerCase();
+	
+	for (let i = 0; i < allOptions.length; i++) {
+	    const optionValue = allOptions[i].value.toLowerCase();
+	    const div = document.getElementById(optionValue);
+	    if (div) {
+		div.style.display = (optionValue === selectedValue) ? 'block' : 'none';
+	    }
 	}
     });
 
