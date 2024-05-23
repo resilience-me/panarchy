@@ -7,6 +7,8 @@ const responseDisplay = document.getElementById('response');
 const addressInput = document.getElementById('addressInput');
 const loadAddressButton = document.getElementById('loadAddressButton');
 
+let isHandlingAccountChange = false;
+
 var scheduleUtil = {
     dateAndTimeString(eventDate) {
 	return eventDate.toLocaleString("en-US", {
@@ -430,8 +432,19 @@ function setupEventListeners() {
     });
 
     window.ethereum?.on('accountsChanged', async (accounts) => {
-        resetDisplay();
-        await handleAccountChange(accounts);
+	if (isHandlingAccountChange) {
+	    console.log('Another account change is already being handled.');
+	    return;
+	}
+	isHandlingAccountChange = true;
+	try {
+	    resetDisplay();
+	    await handleAccountChange(accounts);
+	} catch (error) {
+	    console.error('Error handling account change:', error);
+	} finally {
+	    isHandlingAccountChange = false;
+	}
     });
 }
 
