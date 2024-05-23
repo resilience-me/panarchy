@@ -391,6 +391,7 @@ function promptRegistration() {
 function handleOtherScenarios(address, data, isMetamask, bitpeople) {
     if (data.contracts.bitpeople.currentData.account.tokens.register > 0) {
 	createRegisterDiv();
+	const registerDiv = document.getElementById('register');
 	appendOption("Register");
 	if (data.schedule.currentSchedule.quarter < 2) {
             registerDiv.innerHTML = userStringForLoggedInOrNot(isMetamask, address) + ' can register for the event';
