@@ -121,7 +121,7 @@ async function fetchAccountInfo(address, bitpeople) {
         } else {
             handleOtherScenarios(address, data, isMetamask, bitpeople);
         }
-	if (hasBitpeopleTokens) {
+	if (helper.hasBitpeopleTokens) {
 	    createTransferDiv(data.contracts.bitpeople.currentData.account.tokens, bitpeople);
 	    appendOption("Transfer");
 	}
