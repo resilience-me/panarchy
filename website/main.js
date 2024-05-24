@@ -87,6 +87,9 @@ var helper = {
     },
     courtPairMemberShuffled(data) {
 	return data.contracts.bitpeople.currentData.account.court.judges[0] != '0x0000000000000000000000000000000000000000' || data.contracts.bitpeople.currentData.account.court.judges[1] != '0x0000000000000000000000000000000000000000'
+    },
+    hasBitpeopleTokens(data) {
+        return Object.values(data.contracts.bitpeople.currentData.account.tokens).some(token => token > 0);
     }
 };
 
@@ -118,6 +121,10 @@ async function fetchAccountInfo(address, bitpeople) {
         } else {
             handleOtherScenarios(address, data, isMetamask, bitpeople);
         }
+	if (hasBitpeopleTokens) {
+	    createTransferDiv(data.contracts.bitpeople.currentData.account.tokens, bitpeople);
+	    appendOption("Transfer");
+	}
         if(options.options.length > 1) {
             dropdownMenu.style.display = 'block';
             options.selectedIndex = 0;
@@ -409,8 +416,7 @@ function handleOtherScenarios(address, data, isMetamask, bitpeople) {
             registerDiv.innerHTML = userStringForLoggedInOrNot(isMetamask, address) + ' can register for the event';
             if (isMetamask) {
 		promptRegistration(registerDiv, bitpeople);
-		createTransferDiv(data.contracts.bitpeople.currentData.account.tokens, bitpeople);
-		appendOption("Transfer");
+
 	    } else {
 		registerDiv.innerHTML += [
 		    '<p>Registration closes ' + scheduleUtil.halftimeString(data) + '</p>',
