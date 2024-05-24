@@ -555,7 +555,7 @@ window.addEventListener('load', async () => {
     if(!await readAddressFromURL()) {
         if (window.ethereum) {
             try {
-                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
 		await handleAccountChange(accounts);
             } catch (error) {
                 console.error('Error fetching accounts:', error);
