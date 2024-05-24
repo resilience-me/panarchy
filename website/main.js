@@ -253,7 +253,7 @@ function setupShuffleButton() {
 
 function handleRegistrationStatus(address, data, isMetamask, bitpeople) {
     responseDisplay.innerHTML = userStringForLoggedInOrNot(isMetamask, address, ' are', ' is') + ' registered for the upcoming event on ' + scheduleUtil.pseudonymEventString(data);
-
+    appendOption("Default");
     if (data.schedule.currentSchedule.quarter == 3) {
 	if(!data.contracts.bitpeople.currentData.account.shuffler) {
 	    responseDisplay.innerHTML += '<p>It is time to shuffle. After you have shuffled, you can contact the person in your pair to agree on a video channel. </p>';
