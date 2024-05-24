@@ -251,12 +251,36 @@ function setupShuffleButton() {
     responseDisplay.appendChild(shuffleBtn);
 }
 
+function createDefaultDiv() {
+    const defaultDiv = document.createElement('div');
+    defaultDiv.id = 'default';
+    defaultDiv.style.display = 'none';
+    responseDisplay.appendChild(defaultDiv);
+}
+
+function promptRegistration(registerDiv, bitpeople) {
+    const randomNumber = generateRandomNumber();
+    registerDiv.innerHTML += [
+        '<p>To register, you need to contribute a random number to the random number generator.</p>',
+        `<p>This site has generated one for you: <input type="text" value="${randomNumber}" size="64" style="max-width: 100%; box-sizing: border-box;" readonly></p>`,
+        '<p>Write it down, you will need it to claim your proof-of-unique-human later.</p>'
+    ].join('');
+
+    const registerBtn = document.createElement('button');
+    registerBtn.textContent = 'Register';
+    registerBtn.addEventListener('click', () => bitpeople.register(randomNumber));
+    registerDiv.appendChild(registerBtn);
+}
+
 function handleRegistrationStatus(address, data, isMetamask, bitpeople) {
-    responseDisplay.innerHTML = userStringForLoggedInOrNot(isMetamask, address, ' are', ' is') + ' registered for the upcoming event on ' + scheduleUtil.pseudonymEventString(data);
+    createDefaultDiv();
     appendOption("Default");
+    const defaultDiv = document.getElementById('register');
+    defaultDiv.innerHTML = userStringForLoggedInOrNot(isMetamask, address, ' are', ' is') + ' registered for the upcoming event on ' + scheduleUtil.pseudonymEventString(data);
+
     if (data.schedule.currentSchedule.quarter == 3) {
 	if(!data.contracts.bitpeople.currentData.account.shuffler) {
-	    responseDisplay.innerHTML += '<p>It is time to shuffle. After you have shuffled, you can contact the person in your pair to agree on a video channel. </p>';
+	    defaultDiv.innerHTML += '<p>It is time to shuffle. After you have shuffled, you can contact the person in your pair to agree on a video channel. </p>';
             setupShuffleButton();
 	} else if (helper.isPaired(data)) {
             if (isMetamask) {
@@ -264,24 +288,24 @@ function handleRegistrationStatus(address, data, isMetamask, bitpeople) {
                 const path = "index";
                 const url = new URL(path, baseUrl);
                 url.searchParams.append('a', data.contracts.bitpeople.currentData.account.pair.partner);
-		responseDisplay.innerHTML += '<p>Contact the person in your pair to agree on a video channel: ' + '<a href="' + url.href + '">' + url.href + '</a></p>';
+		defaultDiv.innerHTML += '<p>Contact the person in your pair to agree on a video channel: ' + '<a href="' + url.href + '">' + url.href + '</a></p>';
 		const courtsToJudgeCount = helper.isOptInJudge(data);
 		if (courtsToJudgeCount > 0) {
 		    let courtDynamicText = 'a "court"';
 		    if (courtsToJudgeCount == 2) {
 		        courtDynamicText = 'two "courts"';
 		    }
-		    responseDisplay.innerHTML += `<p>You have been assigned to judge ${courtDynamicText}. They can contact you on ${baseUrl} too.</p>`;
+		    defaultDiv.innerHTML += `<p>You have been assigned to judge ${courtDynamicText}. They can contact you on ${baseUrl} too.</p>`;
 		}
 	    } else {
-                responseDisplay.innerHTML += '<p>Log in with a wallet to contact the person in the pair</p>';
+                defaultDiv.innerHTML += '<p>Log in with a wallet to contact the person in the pair</p>';
             }
         } else if (isMetamask) {
-	    responseDisplay.innerHTML += '<p>You are not paired yet. Wait until shuffling is complete. You can shuffle again to speed things up. </p>';
+	    defaultDiv.innerHTML += '<p>You are not paired yet. Wait until shuffling is complete. You can shuffle again to speed things up. </p>';
             setupShuffleButton();
         }
     } else if (data.schedule.currentSchedule.quarter < 2 && data.contracts.bitpeople.currentData.account.tokens.optIn > 0 && isMetamask) {
-	responseDisplay.innerHTML += '<p>You have an extra opt-in token. You can use it to invite another person: </p>';
+	defaultDiv.innerHTML += '<p>You have an extra opt-in token. You can use it to invite another person: </p>';
 	const input = document.createElement("input");
 	input.type = "text";
 	input.value = "Account to invite";
@@ -293,8 +317,8 @@ function handleRegistrationStatus(address, data, isMetamask, bitpeople) {
 	    button.disabled = !formats.isValidAddress(input.value.trim());
 	});	    
 	button.addEventListener('click', () => bitpeople.transfer(input.value(), 1, 2));
-	responseDisplay.appendChild(input);
-	responseDisplay.appendChild(button);
+	defaultDiv.appendChild(input);
+	defaultDiv.appendChild(button);
     }
 }
 
