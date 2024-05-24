@@ -125,7 +125,7 @@ class Bitpeople {
 	const registerDiv = document.getElementById('register');
         try {
             const randomHash = this.web3.utils.sha3('0x' + randomNumber);
-            const result = await this.bitpeopleContract.methods.register(randomHash).send(this.txObj);
+            const result = await this.bitpeopleContract.methods.register(randomHash).send(this.txObj)
 	    .on('transactionHash', function(hash) {
 		console.log('Transaction hash:', hash);
 		registerDiv.innerHTML = `Transaction submitted. Hash: <span class="truncated-hex">${hash}</span>`;
