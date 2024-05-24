@@ -275,7 +275,7 @@ function promptRegistration(registerDiv, bitpeople) {
 function handleRegistrationStatus(address, data, isMetamask, bitpeople) {
     createDefaultDiv();
     appendOption("Default");
-    const defaultDiv = document.getElementById('register');
+    const defaultDiv = document.getElementById('default');
     defaultDiv.innerHTML = userStringForLoggedInOrNot(isMetamask, address, ' are', ' is') + ' registered for the upcoming event on ' + scheduleUtil.pseudonymEventString(data);
 
     if (data.schedule.currentSchedule.quarter == 3) {
