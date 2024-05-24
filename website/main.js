@@ -127,9 +127,9 @@ async function fetchAccountInfo(address, bitpeople) {
 	}
         if(options.options.length > 1) {
             dropdownMenu.style.display = 'block';
-            options.selectedIndex = 0;
-            options.dispatchEvent(new Event('change'));
         }
+	options.selectedIndex = 0;
+	options.dispatchEvent(new Event('change'));
     } catch (error) {
         console.error('Error fetching account info:', error);
     } finally {
