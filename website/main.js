@@ -185,7 +185,7 @@ function handlePseudonymEvent(address, data, isMetamask, bitpeople) {
 	    responseDisplay.innerHTML += '<p>Log in with a wallet to verify the other person in the pair</p>';
 	}
     } else if (helper.isVerified(data)) {
-	if(data.schedule.currentSchedule.quarter < 2) {
+	if(!scheduleUtil.isHalftime(data)) {
 	    if (isMetamask) {
 		responseDisplay.innerHTML += [
 		    '<p>You are verified and have collected your tokens</p>',
@@ -312,21 +312,6 @@ function handleRegistrationStatus(address, data, isMetamask, bitpeople) {
 	    defaultDiv.innerHTML += '<p>You are not paired yet. Wait until shuffling is complete. You can shuffle again to speed things up. </p>';
             setupShuffleButton();
         }
-    } else if (data.schedule.currentSchedule.quarter < 2 && data.contracts.bitpeople.currentData.account.tokens.optIn > 0 && isMetamask) {
-	defaultDiv.innerHTML += '<p>You have an extra opt-in token. You can use it to invite another person: </p>';
-	const input = document.createElement("input");
-	input.type = "text";
-	input.value = "Account to invite";
-	input.size = 42;
-	const button = document.createElement("button");
-	button.textContent = "Transfer";
-	button.disabled = true;
-	input.addEventListener('input', function() {
-	    button.disabled = !formats.isValidAddress(input.value.trim());
-	});	    
-	button.addEventListener('click', () => bitpeople.transfer(input.value(), 1, 2));
-	defaultDiv.appendChild(input);
-	defaultDiv.appendChild(button);
     }
 }
 
@@ -444,7 +429,7 @@ function handleOtherScenarios(address, data, isMetamask, bitpeople) {
 	createRegisterDiv();
 	const registerDiv = document.getElementById('register');
 	appendOption("Register");
-	if (data.schedule.currentSchedule.quarter < 2) {
+	if (!scheduleUtil.isHalftime(data)) {
             registerDiv.innerHTML = userStringForLoggedInOrNot(isMetamask, address) + ' can register for the event';
             if (isMetamask) {
 		promptRegistration(registerDiv, bitpeople);
@@ -459,7 +444,7 @@ function handleOtherScenarios(address, data, isMetamask, bitpeople) {
             registerDiv.innerText = 'The next registration period opens on: ' + scheduleUtil.nextPeriodString(data);
         }
     } else if (data.contracts.bitpeople.currentData.account.tokens.optIn > 0) {
-        if (data.schedule.currentSchedule.quarter < 2) {
+        if (!scheduleUtil.isHalftime(data)) {
             responseDisplay.innerHTML = userStringForLoggedInOrNot(isMetamask, address, ' have', ' has') + ' an opt-in token and can opt-in to the network';
             if (isMetamask) {
                 const optInDiv = document.createElement('div');
