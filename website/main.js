@@ -497,6 +497,7 @@ function updateAddress(newAddress) {
 }
 
 async function handleAccountChange(accounts) {
+    resetDisplay();
     if (accounts.length > 0) {
         metamaskAccount.style.display = 'block';
         metamaskAccount.innerHTML = `Logged in: <span class="truncated-address">${accounts[0]}</span>`;
@@ -506,8 +507,6 @@ async function handleAccountChange(accounts) {
         const bitpeople = new Bitpeople(web3, txObj);
         await fetchAccountInfo(accounts[0], bitpeople);
         updateAddress();
-    } else {
-	resetDisplay();
     }
 }
 
