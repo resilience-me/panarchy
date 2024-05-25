@@ -94,6 +94,7 @@ var helper = {
 		if (register > 0 || optIn > 0) return true;
 	}
 	if (proofOfUniqueHuman > 0 || borderVote > 0) return true;
+	return false;
     }
 };
 
