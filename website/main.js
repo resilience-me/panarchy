@@ -89,7 +89,11 @@ var helper = {
 	return data.contracts.bitpeople.currentData.account.court.judges[0] != '0x0000000000000000000000000000000000000000' || data.contracts.bitpeople.currentData.account.court.judges[1] != '0x0000000000000000000000000000000000000000'
     },
     hasBitpeopleTokens(data) {
-        return Object.values(data.contracts.bitpeople.currentData.account.tokens).some(token => token > 0);
+	const { proofOfUniqueHuman, register, optIn, borderVote } = data.contracts.bitpeople.currentData.account.tokens;
+	if (data.schedule.currentSchedule.quarter < 2) {
+		if (register > 0 || optIn > 0) return true;
+	}
+	if (proofOfUniqueHuman > 0 || borderVote > 0) return true;
     }
 };
 
