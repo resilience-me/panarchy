@@ -518,6 +518,7 @@ function resetDisplay() {
     responseDisplay.innerText = '';
     responseDisplay.style.display = 'none'
     options.innerHTML = '';
+    dropdownMenu.style.display = 'none';
 }
 
 function setupEventListeners() {
