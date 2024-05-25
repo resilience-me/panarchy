@@ -28,6 +28,9 @@ var scheduleUtil = {
 	const weeksInSeconds = 60 * 60 * 24 * 7;
 	const time = parseInt(data.schedule.currentSchedule.toSeconds, 10) + weeksInSeconds * 2;
 	return this.dateAndTimeString(new Date(time * 1000));
+    },
+    isHalftime(data) {
+	return data.schedule.currentSchedule.quarter >= 2;
     }
 }
 
@@ -90,7 +93,7 @@ var helper = {
     },
     hasBitpeopleTokens(data) {
 	const { proofOfUniqueHuman, register, optIn, borderVote } = data.contracts.bitpeople.currentData.account.tokens;
-	if (data.schedule.currentSchedule.quarter < 2) {
+	if (!scheduleUtil.isHalftime(data)) {
 		if (register > 0 || optIn > 0) return true;
 	}
 	if (proofOfUniqueHuman > 0 || borderVote > 0) return true;
