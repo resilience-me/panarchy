@@ -506,6 +506,8 @@ async function handleAccountChange(accounts) {
         const bitpeople = new Bitpeople(web3, txObj);
         await fetchAccountInfo(accounts[0], bitpeople);
         updateAddress();
+    } else {
+	resetDisplay();
     }
 }
 
@@ -550,7 +552,14 @@ function setupEventListeners() {
     document.getElementById('loginButton').addEventListener('click', async () => {
         if (window.ethereum) {
             try {
-                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+		if (accounts.length > 0) {
+			await handleAccountChange(accounts);
+		}
+		else {
+			await window.ethereum.request({ method: 'eth_requestAccounts' });
+		}
+	        
             } catch (error) {
                 console.error('User denied account access:', error);
             }
