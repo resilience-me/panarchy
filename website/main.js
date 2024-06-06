@@ -252,7 +252,7 @@ function handlePseudonymEvent(address, data, isMetamask, bitpeople) {
     }
 }
 
-function setupShuffleButton() {
+function setupShuffleButton(bitpeople) {
     const shuffleBtn = document.createElement('button');
     shuffleBtn.textContent = 'Shuffle';
     shuffleBtn.addEventListener('click', () => bitpeople.shuffle());
@@ -289,7 +289,7 @@ function handleRegistrationStatus(address, data, isMetamask, bitpeople) {
     if (data.schedule.currentSchedule.quarter == 3) {
 	if(!data.contracts.bitpeople.currentData.account.shuffler) {
 	    defaultDiv.innerHTML += '<p>It is time to shuffle. After you have shuffled, you can contact the person in your pair to agree on a video channel. </p>';
-            setupShuffleButton();
+            setupShuffleButton(bitpeople);
 	} else if (helper.isPaired(data)) {
             if (isMetamask) {
                 const baseUrl = "https://chat.blockscan.com/";
@@ -310,7 +310,7 @@ function handleRegistrationStatus(address, data, isMetamask, bitpeople) {
             }
         } else if (isMetamask) {
 	    defaultDiv.innerHTML += '<p>You are not paired yet. Wait until shuffling is complete. You can shuffle again to speed things up. </p>';
-            setupShuffleButton();
+            setupShuffleButton(bitpeople);
         }
     }
 }
