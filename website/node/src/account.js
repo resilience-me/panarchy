@@ -133,7 +133,7 @@ class Bitpeople {
                 verified: pairData.verified,
                 disputed: pairData.disputed
             }
-            const pairedWithID = pairID * 2 - 1 + (nym.id % 2 ^ 1);
+            const pairedWithID = pairID * 2 - 1 + (nym.id % 2);
             if (pairedWithID != 0 && global.shuffled >= pairedWithID) {
                 pair.partner = await methods.registry(schedule, pairedWithID - 1).call();
             }
