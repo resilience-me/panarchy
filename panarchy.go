@@ -326,7 +326,7 @@ func (p *Panarchy) Author(header *types.Header) (common.Address, error) {
 func (p *Panarchy) getValidator(timestamp uint64, blockNumber *big.Int, totalSkipped *big.Int, state *state.StateDB) common.Address {
 	currentSchedule := schedule(timestamp)
 	currentIndex := make([]byte, 32)
-	binary.BigEndian.PutUint64(currentIndex, currentSchedule)
+	binary.BigEndian.PutUint64(currentIndex[24:], currentSchedule)
 	seed := big.NewInt(0)
 	if currentSchedule != 0 {
 		previousIndex := make([]byte, 32)
