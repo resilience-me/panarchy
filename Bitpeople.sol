@@ -1,6 +1,6 @@
 contract Bitpeople {
 
-    uint constant public genesis = 1715407200;
+    uint constant public genesis = 1717826400;
     uint constant public period = 4 weeks;
 
     function schedule() public view returns(uint) { return (block.timestamp - genesis) / period; }
