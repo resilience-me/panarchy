@@ -39,7 +39,7 @@ var (
 )
 
 const (
-	genesis uint64 = 1715407200
+	genesis uint64 = 1717826400
 	period 	uint64 = 4*7*24*60*60
 )
 
