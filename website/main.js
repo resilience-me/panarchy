@@ -496,7 +496,7 @@ async function handleAccountChange(accounts) {
         metamaskAccount.innerHTML = `Logged in: <span class="truncated-address">${accounts[0]}</span>`;
         accountInput.style.display = 'none';
         const web3 = new Web3(window.ethereum);
-	const chainId = await this.web3.eth.getChainId();
+	const chainId = await web3.eth.getChainId();
 	if(chainId == 2013) {
 	    const txObj = await fromAndGasPrice(accounts[0], web3);
 	    const bitpeople = new Bitpeople(web3, txObj);
