@@ -2,7 +2,7 @@ interface Bitpeople { function proofOfUniqueHuman(uint t, address account) exter
 
 contract Schedule {
 
-    uint constant public genesis = 1717826400;
+    uint constant public genesis = 1719036000;
     uint constant public period = 4 weeks;
 
     function schedule() public view returns(uint) { return ((block.timestamp - genesis) / period); }
