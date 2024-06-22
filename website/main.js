@@ -496,10 +496,16 @@ async function handleAccountChange(accounts) {
         metamaskAccount.innerHTML = `Logged in: <span class="truncated-address">${accounts[0]}</span>`;
         accountInput.style.display = 'none';
         const web3 = new Web3(window.ethereum);
-        const txObj = await fromAndGasPrice(accounts[0], web3);
-        const bitpeople = new Bitpeople(web3, txObj);
-        await fetchAccountInfo(accounts[0], bitpeople);
-        updateAddress();
+	const chainId = await this.web3.eth.getChainId();
+	if(chainId == 2013) {
+	    const txObj = await fromAndGasPrice(accounts[0], web3);
+	    const bitpeople = new Bitpeople(web3, txObj);
+	    await fetchAccountInfo(accounts[0], bitpeople);
+	    updateAddress();
+	}
+	else {
+	     responseDisplay.innerHTML = 'Logged in to wrong network. Add Panarchy network to your wallet via <a href="https://chainlist.org/chain/2013">https://chainlist.org/chain/2013</a>. '
+	}
     }
 }
 
