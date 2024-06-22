@@ -504,7 +504,8 @@ async function handleAccountChange(accounts) {
 	    updateAddress();
 	}
 	else {
-	     responseDisplay.innerHTML = 'Logged in to wrong network. Add Panarchy network to your wallet via <a href="https://chainlist.org/chain/2013">https://chainlist.org/chain/2013</a>. '
+            responseDisplay.style.display = 'block';
+	    responseDisplay.innerHTML = 'Logged in to wrong network. Add Panarchy network to your wallet via <a href="https://chainlist.org/chain/2013">https://chainlist.org/chain/2013</a>. '
 	}
     }
 }
