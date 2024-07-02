@@ -188,11 +188,6 @@ func (p *Panarchy) Prepare(chain consensus.ChainHeaderReader, header *types.Head
 		return consensus.ErrUnknownAncestor
 	}
 	header.Time = p.calcTimestamp(chain, parent)
-	if header.Number.Uint64() > 1 {
-		grandParent := chain.GetHeader(parent.ParentHash, parent.Number.Uint64()-1)
-		skipped := parent.Nonce.Uint64() - grandParent.Nonce.Uint64()
-		header.Time += skipped*p.config.Period
-	}
 	p.updateCheckpoint(header.Time)
 	header.Difficulty = p.CalcDifficulty(chain, header.Time, parent)
 	return nil
