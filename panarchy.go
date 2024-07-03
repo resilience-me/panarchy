@@ -100,17 +100,6 @@ func (p *Panarchy) VerifyHeaders(chain consensus.ChainHeaderReader, headers []*t
 	}()
 	return abort, results
 }
-
-func (p *Panarchy) calcTimestamp(chain consensus.ChainHeaderReader, parent *types.Header) uint64 {
-    timestamp := parent.Time + p.config.Period
-    if parent.Number.Uint64() > 0 {
-        grandParent := chain.GetHeader(parent.ParentHash, parent.Number.Uint64()-1)
-        skipped := parent.Nonce.Uint64() - grandParent.Nonce.Uint64()
-        timestamp += skipped * p.config.Period
-    }
-    return timestamp
-}
-
 func (p *Panarchy) verifyHeader(chain consensus.ChainHeaderReader, header *types.Header, parents []*types.Header) error {
 
 	number := header.Number.Uint64()
@@ -131,7 +120,7 @@ func (p *Panarchy) verifyHeader(chain consensus.ChainHeaderReader, header *types
 		return err
 	}
 	
-	if p.calcTimestamp(chain, parent) != header.Time {
+	if parent.Time+p.config.Period != header.Time {
 		return errInvalidTimestamp
 	}
 	skipped := header.Nonce.Uint64() - parent.Nonce.Uint64()
@@ -187,7 +176,12 @@ func (p *Panarchy) Prepare(chain consensus.ChainHeaderReader, header *types.Head
 	if parent == nil {
 		return consensus.ErrUnknownAncestor
 	}
-	header.Time = p.calcTimestamp(chain, parent)
+	header.Time = parent.Time + p.config.Period
+	if header.Number.Uint64() > 1 {
+		grandParent := chain.GetHeader(parent.ParentHash, parent.Number.Uint64()-1)
+		skipped := parent.Nonce.Uint64() - grandParent.Nonce.Uint64()
+		header.Time += skipped*p.config.Period
+	}
 	p.updateCheckpoint(header.Time)
 	header.Difficulty = p.CalcDifficulty(chain, header.Time, parent)
 	return nil
