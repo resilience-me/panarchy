@@ -120,9 +120,22 @@ func (p *Panarchy) verifyHeader(chain consensus.ChainHeaderReader, header *types
 		return err
 	}
 	
-	if parent.Time+p.config.Period != header.Time {
+	timestamp := parent.Time + p.config.Period
+	if header.Number.Uint64() > 1 {
+		var grandParent *types.Header
+		if len(parents) > 1 {
+			grandParent = parents[len(parents)-2]
+		} else {
+			grandParent = chain.GetHeader(parent.ParentHash, parent.Number.Uint64()-1)
+		}
+		parentSkipped := parent.Nonce.Uint64() - grandParent.Nonce.Uint64()
+		timestamp += parentSkipped * p.config.Period
+	}
+
+	if timestamp != header.Time {
 		return errInvalidTimestamp
 	}
+	
 	skipped := header.Nonce.Uint64() - parent.Nonce.Uint64()
 	if header.Time + skipped*p.config.Period > uint64(time.Now().Unix()) + allowedFutureBlockTime {
 		return consensus.ErrFutureBlock
