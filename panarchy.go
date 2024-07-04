@@ -343,7 +343,7 @@ func (p *Panarchy) getValidator(timestamp uint64, blockNumber *big.Int, totalSki
 	seed := big.NewInt(0)
 	if currentSchedule != 0 {
 		previousIndex := make([]byte, 32)
-		binary.BigEndian.PutUint64(previousIndex, currentSchedule - 1)
+		binary.BigEndian.PutUint64(previousIndex[24:], currentSchedule - 1)
 		seedKey := crypto.Keccak256Hash(append(previousIndex, seedSlot...))
 		seedValue := state.GetState(bitpeopleContract, seedKey)
 		seed.SetBytes(seedValue.Bytes())
