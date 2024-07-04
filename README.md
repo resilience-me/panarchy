@@ -46,7 +46,7 @@ Wallet-to-wallet messaging services like https://chat.blockscan.com/ or https://
 
 ### Install
 
-The engine interfaces with the Clique custom consensus engine interface (Clique has an "Authorize" method that Panarchy engine uses, as well as getters for block period. ) To install, replace the files in the Clique package in [core-geth](https://github.com/etclabscore/core-geth) with panarchy.go. I'm using it with version [dca3897e331741b4bb311783221fe7a5775d4252}(https://github.com/etclabscore/core-geth/tree/dca3897e331741b4bb311783221fe7a5775d4252) of core-geth.
+The engine interfaces with the Clique custom consensus engine interface (Clique has an "Authorize" method that Panarchy engine uses, as well as getters for block period. ) To install, replace the files in the Clique package in [core-geth](https://github.com/etclabscore/core-geth) with panarchy.go. I'm using it with version [dca3897e331741b4bb311783221fe7a5775d4252](https://github.com/etclabscore/core-geth/tree/dca3897e331741b4bb311783221fe7a5775d4252) of core-geth.
 
 ### Documentation
 
