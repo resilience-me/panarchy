@@ -12,7 +12,7 @@ contract Schedule {
 
 contract Election is Schedule {
 
-    Bitpeople bitpeople = Bitpeople(0x0000000000000000000000000000000000000010);
+    Bitpeople bitpeople;
 
     struct Data {
         address[] election;
