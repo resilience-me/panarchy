@@ -28,7 +28,7 @@ contract Exp {
 
 contract PAN is Schedule, Exp {
 
-    Bitpeople bitpeople = Bitpeople(0x0000000000000000000000000000000000000010);
+    Bitpeople bitpeople;
 
     string constant public symbol = "PAN";
     uint8 constant public decimals = 18;
