@@ -120,7 +120,8 @@ async function fetchAccountInfo(address, bitpeople) {
             handlePoUH(address, data, isMetamask, bitpeople);
         } else if (data.contracts.bitpeople.currentData.account.tokens.proofOfUniqueHuman > 0) {
             handleClaimPoUH(address, data, isMetamask, bitpeople);
-        } else if (helper.inPseudonymEvent(data)) {
+        }
+	if (helper.inPseudonymEvent(data)) {
             handlePseudonymEvent(address, data, isMetamask, bitpeople);
         } else if (helper.isRegistered(data)) {
             handleRegistrationStatus(address, data, isMetamask, bitpeople);
