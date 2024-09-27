@@ -161,7 +161,7 @@ function handlePoUH(address, data, isMetamask, bitpeople) {
     responseDisplay.innerHTML = userStringForLoggedInOrNot(isMetamask, address, ' have', ' has') + ' a proof-of-unique-human';
 }
 function handleClaimPoUH(address, data, isMetamask, bitpeople) {
-    responseDisplay.innerHTML = userStringForLoggedInOrNot(isMetamask, address) + ' is verified and can claim their proof-of-unique-human';
+    responseDisplay.innerHTML = userStringForLoggedInOrNot(isMetamask, address, ' are', ' is') + ' verified and can claim a proof-of-unique-human';
     if (isMetamask) {
 	responseDisplay.innerHTML += '<p>Claim your proof-of-unique-human</p>';
 	const claimBtn = document.createElement('button');
