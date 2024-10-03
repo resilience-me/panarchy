@@ -209,21 +209,21 @@ contract Bitpeople {
         else currentData.traverser++;
     }
 
-    function _transfer(uint t, address from, address to, uint value, Token token) internal {
+    function _transfer(uint t, Token token, address from, address to, uint value) internal {
         require(data[t].balanceOf[token][from] >= value, "Transfer failed: Insufficient balance");
         data[t].balanceOf[token][from] -= value;
         data[t].balanceOf[token][to] += value;
         emit Transfer(t, token, from, to, value);
     }
-    function transfer(address to, uint value, Token token) external {
+    function transfer(Token token, address to, uint value) external {
     _transfer(schedule(), msg.sender, to, value, token);
     }
-    function approve(address spender, uint value, Token token) external {
+    function approve(Token token, address spender, uint value) external {
         uint t = schedule();
         data[t].allowance[token][msg.sender][spender] = value;
         emit Approval(t, token, msg.sender, spender, value);
     }
-    function transferFrom(address from, address to, uint value, Token token) external {
+    function transferFrom(Token token, address from, address to, uint value) external {
         uint t = schedule();
         require(data[t].allowance[token][from][msg.sender] >= value, "Transfer failed: Allowance exceeded");
         _transfer(t, from, to, value, token);
