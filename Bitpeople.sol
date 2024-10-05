@@ -216,7 +216,7 @@ contract Bitpeople {
         emit Transfer(t, token, from, to, value);
     }
     function transfer(Token token, address to, uint value) external {
-    _transfer(schedule(), msg.sender, to, value, token);
+    _transfer(schedule(), token, msg.sender, to, value);
     }
     function approve(Token token, address spender, uint value) external {
         uint t = schedule();
@@ -226,7 +226,7 @@ contract Bitpeople {
     function transferFrom(Token token, address from, address to, uint value) external {
         uint t = schedule();
         require(data[t].allowance[token][from][msg.sender] >= value, "Transfer failed: Allowance exceeded");
-        _transfer(t, from, to, value, token);
+        _transfer(t, token, from, to, value);
         data[t].allowance[token][from][msg.sender] -= value;
     }
 
