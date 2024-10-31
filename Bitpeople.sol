@@ -9,6 +9,30 @@ contract Bitpeople {
     function hour(uint t) public pure returns (uint) { return 1 + uint(keccak256(abi.encode(t)))%24; }
     function pseudonymEvent(uint t) public pure returns (uint) { return toSeconds(t) + hour(t)*1 hours; }
 
+    string constant ERR_BALANCE_INSUFFICIENT = "Balance decrement failed: Insufficient balance";
+    string constant ERR_REGISTRATION_PERIOD = "Registration is only allowed in the first two quarters";
+    string constant ERR_OPTIN_PERIOD = "Opting-in is only allowed in the first two quarters";
+    string constant ERR_SHUFFLING_PERIOD = "Shuffling is only allowed in the fourth quarter";
+    string constant ERR_PSEUDONYM_EVENT = "Verification not allowed before the pseudonym event has started";
+    string constant ERR_INVALID_ID = "Invalid ID: ID does not exist";
+    string constant ERR_SHUFFLER_OR_COMPLETE = "Verification failed: Requires shuffler status or completion of shuffling for everyone registered";
+    string constant ERR_PAIR_DISPUTED = "Verification failed: Pair is disputed";
+    string constant ERR_INVALID_COURT = "Invalid court: the signer is not assigned to judge this court";
+    string constant ERR_NYM_ALREADY_VERIFIED = "Nym is already verified";
+    string constant ERR_NYM_PAIR_NOT_VERIFIED = "The nym's pair is not verified";
+    string constant ERR_COURT_PAIR_NOT_VERIFIED = "Court's pair not verified";
+    string constant ERR_COURT_BOTH_JUDGES_REQUIRED = "Verification failed: Both judges of this court must confirm verification";
+    string constant ERR_QUARTER_OPERATION = "Operation must be performed in the third quarter";
+    string constant ERR_NYM_NOT_VERIFIED = "Nym must be verified";
+    string constant ERR_HASH_MISMATCH = "Preimage does not match the committed hash";
+    string constant ERR_TRANSFER_INSUFFICIENT_BALANCE = "Transfer failed: Insufficient balance";
+    string constant ERR_TRANSFER_ALLOWANCE_EXCEEDED = "Transfer failed: Allowance exceeded";
+    string constant ERR_DISPUTE_INVALID_ID = "Invalid ID: ID cannot be zero";
+    string constant ERR_DISPUTE_PAIR_VERIFIED = "Dispute invalid: pair has already been verified";
+    string constant ERR_REASSIGN_PAIR_NOT_DISPUTED = "Reassignment failed: Pair not disputed";
+    string constant ERR_COURT_REASSIGN_PAIR_NOT_DISPUTED = "Reassignment failed: The court's pair is not disputed";
+
+    // Structs, Enums, and Mappings
     struct Nym { uint id; bool verified; }
     struct Pair { bool[2] verified; bool disputed; }
     struct Court { uint id; bool[2] verified; }
@@ -46,18 +70,17 @@ contract Bitpeople {
     event Verify (uint indexed schedule, uint indexed pairID);
     event Judge (uint indexed schedule, address court, uint indexed courtID);
     event Dispute (uint indexed schedule, uint indexed pairID);
-
     event Transfer(uint indexed schedule, Token token, address indexed from, address indexed to, uint256 value);
-    event Approval(uint indexed schedule, Token token,  address indexed owner, address indexed spender, uint256 value);
+    event Approval(uint indexed schedule, Token token, address indexed owner, address indexed spender, uint256 value);
 
-    function getPair(uint id) public pure returns (uint) { return (id+1)/2; }    
+    function getPair(uint id) public pure returns (uint) { return (id+1)/2; }
     function getCourt(Data storage d, uint id) internal view returns (uint) { return id != 0 ? 1 + (id - 1) % (d.registry.length / 2) : 0; }
     function pairVerified(Data storage d, uint id) internal view returns (bool) { return d.pair[id].verified[0] && d.pair[id].verified[1]; }
-    function deductToken(Data storage currentData, Token token) internal { require(currentData.balanceOf[token][msg.sender] >= 1, "Balance decrement failed: Insufficient balance"); currentData.balanceOf[token][msg.sender]--; }
+    function deductToken(Data storage currentData, Token token) internal { require(currentData.balanceOf[token][msg.sender] >= 1, ERR_BALANCE_INSUFFICIENT); currentData.balanceOf[token][msg.sender]--; }
 
     function register(bytes32 randomNumberHash) external {
         uint t = schedule();
-        require(quarter(t) < 2, "Registration is only allowed in the first two quarters");
+        require(quarter(t) < 2, ERR_REGISTRATION_PERIOD);
         Data storage currentData = data[t];
         deductToken(currentData, Token.Register);
         currentData.registry.push(msg.sender);
@@ -65,7 +88,7 @@ contract Bitpeople {
     }
     function optIn() external {
         uint t = schedule();
-        require(quarter(t) < 2, "Opting-in is only allowed in the first two quarters");
+        require(quarter(t) < 2, ERR_OPTIN_PERIOD);
         Data storage currentData = data[t];
         deductToken(currentData, Token.OptIn);
         currentData.courts++;
@@ -89,34 +112,35 @@ contract Bitpeople {
         emit Shuffled(t, randomNym);
         return true;
     }
-
-    function shuffle() external returns (bool)  {
+    function shuffle() external returns (bool) {
         uint t = schedule();
-        require(quarter(t) == 3, "Shuffling is only allowed in the fourth quarter");
+        require(quarter(t) == 3, ERR_SHUFFLING_PERIOD);
         return _shuffle(t);
     }
     function lateShuffle() external returns (bool) {
         return _shuffle(schedule()-1);
     }
+
     function verify() external {
         uint t = schedule()-1;
-        require(block.timestamp > pseudonymEvent(t+1), "Verification not allowed before the pseudonym event has started");
+        require(block.timestamp > pseudonymEvent(t+1), ERR_PSEUDONYM_EVENT);
         Data storage previousData = data[t];
         uint id = previousData.nym[msg.sender].id;
-        require(id != 0, "Invalid ID: ID does not exist");
-        require(previousData.shuffler[msg.sender] || previousData.shuffled == previousData.registry.length, "Verification failed: Requires shuffler status or completion of shuffling for everyone registered");
+        require(id != 0, ERR_INVALID_ID);
+        require(previousData.shuffler[msg.sender] || previousData.shuffled == previousData.registry.length, ERR_SHUFFLER_OR_COMPLETE);
         uint pairID = getPair(id);
-        require(!previousData.pair[pairID].disputed, "Verification failed: Pair is disputed");
+        require(!previousData.pair[pairID].disputed, ERR_PAIR_DISPUTED);
         previousData.pair[pairID].verified[id%2] = true;
         emit Verify(t, pairID);
     }
+
     function judge(address _court) external {
         uint t = schedule()-1;
-        require(block.timestamp > pseudonymEvent(t+1), "Judgement not allowed before the pseudonym event has started");
+        require(block.timestamp > pseudonymEvent(t+1), ERR_PSEUDONYM_EVENT);
         Data storage previousData = data[t];
         uint signer = previousData.nym[msg.sender].id;
         uint courtID = getCourt(previousData, previousData.court[_court].id);
-        require(courtID == getPair(signer), "Invalid court: the signer is not assigned to judge this court");
+        require(courtID == getPair(signer), ERR_INVALID_COURT);
         previousData.court[_court].verified[signer%2] = true;
         emit Judge(t, _court, courtID);
     }
@@ -129,9 +153,9 @@ contract Bitpeople {
         uint t = schedule();
         Data storage currentData = data[t];
         Data storage previousData = data[t-1];
-        require(!previousData.nym[msg.sender].verified, "Nym is already verified");
+        require(!previousData.nym[msg.sender].verified, ERR_NYM_ALREADY_VERIFIED);
         uint id = previousData.nym[msg.sender].id;
-        require(pairVerified(previousData, getPair(id)), "The nym's pair is not verified");
+        require(pairVerified(previousData, getPair(id)), ERR_NYM_PAIR_NOT_VERIFIED);
         allocateTokens(currentData);
         if(id <= previousData.permits) currentData.balanceOf[Token.OptIn][msg.sender]++;
         previousData.nym[msg.sender].verified = true;
@@ -139,8 +163,8 @@ contract Bitpeople {
     function courtVerified() external {
         uint t = schedule();
         Data storage previousData = data[t-1];
-        require(pairVerified(previousData, getCourt(previousData, previousData.court[msg.sender].id)), "Court's pair not verified");
-        require(previousData.court[msg.sender].verified[0] && previousData.court[msg.sender].verified[1], "Verification failed: Both judges of this court must confirm verification");
+        require(pairVerified(previousData, getCourt(previousData, previousData.court[msg.sender].id)), ERR_COURT_PAIR_NOT_VERIFIED);
+        require(previousData.court[msg.sender].verified[0] && previousData.court[msg.sender].verified[1], ERR_COURT_BOTH_JUDGES_REQUIRED);
         delete previousData.court[msg.sender];
     }
 
@@ -148,12 +172,12 @@ contract Bitpeople {
         uint t = schedule();
         Data storage currentData = data[t];
         Data storage previousData = data[t-1];
-        require(quarter(t) == 2, "Operation must be performed in the third quarter");
-        require(previousData.nym[msg.sender].verified, "Nym must be verified");
-        require(keccak256(abi.encode(preimage)) == previousData.commit[msg.sender], "Preimage does not match the committed hash");
+        require(quarter(t) == 2, ERR_QUARTER_OPERATION);
+        require(previousData.nym[msg.sender].verified, ERR_NYM_NOT_VERIFIED);
+        require(keccak256(abi.encode(preimage)) == previousData.commit[msg.sender], ERR_HASH_MISMATCH);
         uint id = (previousData.nym[msg.sender].id+uint(preimage))%previousData.registry.length;
         currentData.points[id]++;
-        if (currentData.points[id] > currentData.points[currentData.seed]) currentData.seed = id;
+        if(currentData.points[id] > currentData.points[currentData.seed]) currentData.seed = id;
         delete previousData.commit[msg.sender];
         currentData.balanceOf[Token.ProofOfUniqueHuman][msg.sender]++;
     }
@@ -169,25 +193,26 @@ contract Bitpeople {
         uint t = early ? schedule() : schedule() - 1;
         Data storage d = data[t];
         uint id = getPair(d.nym[msg.sender].id);
-        require(id != 0, "Invalid ID: ID cannot be zero");
-        if(!early) require(!pairVerified(d, id), "Dispute invalid: pair has already been verified");
+        require(id != 0, ERR_DISPUTE_INVALID_ID);
+        if (!early) require(!pairVerified(d, id), ERR_DISPUTE_PAIR_VERIFIED);
         d.pair[id].disputed = true;
         emit Dispute(t, id);
     }
     function reassignNym(bool early) external {
         Data storage d = early ? data[schedule()] : data[schedule() - 1];
         uint id = d.nym[msg.sender].id;
-        require(d.pair[getPair(id)].disputed, "Reassignment failed: Pair not disputed");
+        require(d.pair[getPair(id)].disputed, ERR_REASSIGN_PAIR_NOT_DISPUTED);
         delete d.nym[msg.sender];
         d.court[msg.sender].id = uint(keccak256(abi.encode(id)));
     }
     function reassignCourt(bool early) external {
         Data storage d = early ? data[schedule()] : data[schedule() - 1];
         uint id = d.court[msg.sender].id;
-        require(d.pair[getCourt(d, id)].disputed, "Reassignment failed: The court's pair is not disputed");
+        require(d.pair[getCourt(d, id)].disputed, ERR_COURT_REASSIGN_PAIR_NOT_DISPUTED);
         delete d.court[msg.sender].verified;
         d.court[msg.sender].id = uint(keccak256(abi.encode(0, id)));
     }
+
     function borderVote(uint target) external {
         Data storage currentData = data[schedule()];
         deductToken(currentData, Token.BorderVote);
@@ -210,13 +235,13 @@ contract Bitpeople {
     }
 
     function _transfer(uint t, Token token, address from, address to, uint value) internal {
-        require(data[t].balanceOf[token][from] >= value, "Transfer failed: Insufficient balance");
+        require(data[t].balanceOf[token][from] >= value, ERR_TRANSFER_INSUFFICIENT_BALANCE);
         data[t].balanceOf[token][from] -= value;
         data[t].balanceOf[token][to] += value;
         emit Transfer(t, token, from, to, value);
     }
     function transfer(Token token, address to, uint value) external {
-    _transfer(schedule(), token, msg.sender, to, value);
+        _transfer(schedule(), token, msg.sender, to, value);
     }
     function approve(Token token, address spender, uint value) external {
         uint t = schedule();
@@ -225,7 +250,7 @@ contract Bitpeople {
     }
     function transferFrom(Token token, address from, address to, uint value) external {
         uint t = schedule();
-        require(data[t].allowance[token][from][msg.sender] >= value, "Transfer failed: Allowance exceeded");
+        require(data[t].allowance[token][from][msg.sender] >= value, ERR_TRANSFER_ALLOWANCE_EXCEEDED);
         _transfer(t, token, from, to, value);
         data[t].allowance[token][from][msg.sender] -= value;
     }
